@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS
+-- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + AUTO JUMP + ESP
 -- KEY : ntmr10317
 --==================================================
 
@@ -18,13 +18,14 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 if not UserInputService.TouchEnabled then return end
-
 local Player = Players.LocalPlayer
 
 getgenv().AutoClick = false
 getgenv().AutoSpeed = 0
 getgenv().GravityOn = false
 getgenv().CustomGravity = workspace.Gravity
+getgenv().AutoJump = false
+getgenv().ESPEnabled = false
 
 --================ GUI =================
 local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
@@ -69,7 +70,7 @@ Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,10)
 
 --================ MAIN HUB =================
 local Frame = Instance.new("Frame", Gui)
-Frame.Size = UDim2.new(0,220,0,320)
+Frame.Size = UDim2.new(0,220,0,400)
 Frame.Position = UDim2.new(0,10,0,120)
 Frame.Visible = false
 Frame.Active = true
@@ -77,7 +78,7 @@ Frame.Draggable = true
 Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
 
--- AUTO BUTTON
+-- AUTO CLICK BUTTON
 local AutoBtn = Instance.new("TextButton", Frame)
 AutoBtn.Size = UDim2.new(1,-20,0,40)
 AutoBtn.Position = UDim2.new(0,10,0,10)
@@ -115,6 +116,24 @@ GravityBtn.TextColor3 = Color3.new(1,1,1)
 GravityBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 Instance.new("UICorner", GravityBtn).CornerRadius = UDim.new(0,10)
 
+-- AUTO JUMP BUTTON
+local JumpBtn = Instance.new("TextButton", Frame)
+JumpBtn.Size = UDim2.new(1,-20,0,40)
+JumpBtn.Position = UDim2.new(0,10,0,200)
+JumpBtn.Text = "AUTO JUMP : OFF"
+JumpBtn.TextColor3 = Color3.new(1,1,1)
+JumpBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+Instance.new("UICorner", JumpBtn).CornerRadius = UDim.new(0,10)
+
+-- ESP BUTTON
+local ESPBtn = Instance.new("TextButton", Frame)
+ESPBtn.Size = UDim2.new(1,-20,0,40)
+ESPBtn.Position = UDim2.new(0,10,0,245)
+ESPBtn.Text = "ESP : OFF"
+ESPBtn.TextColor3 = Color3.new(1,1,1)
+ESPBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+Instance.new("UICorner", ESPBtn).CornerRadius = UDim.new(0,10)
+
 -- FPS LABEL
 local FPSLabel = Instance.new("TextLabel", Frame)
 FPSLabel.Size = UDim2.new(1,-20,0,30)
@@ -144,7 +163,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
 
---================ AUTO LOOP (0 = FAST) =================
+--================ AUTO LOOP =================
 task.spawn(function()
 	while true do
 		if getgenv().AutoClick then
@@ -165,12 +184,13 @@ task.spawn(function()
 	end
 end)
 
+-- AUTO BUTTON
 AutoBtn.MouseButton1Click:Connect(function()
 	getgenv().AutoClick = not getgenv().AutoClick
 	AutoBtn.Text = "AUTO CLICK : " .. (getgenv().AutoClick and "ON" or "OFF")
 end)
 
---================ GRAVITY =================
+-- GRAVITY BUTTON
 GravityBtn.MouseButton1Click:Connect(function()
 	getgenv().GravityOn = not getgenv().GravityOn
 	if getgenv().GravityOn then
@@ -180,6 +200,62 @@ GravityBtn.MouseButton1Click:Connect(function()
 		workspace.Gravity = 196.2
 	end
 	GravityBtn.Text = "GRAVITY : " .. (getgenv().GravityOn and "ON" or "OFF")
+end)
+
+-- AUTO JUMP BUTTON
+JumpBtn.MouseButton1Click:Connect(function()
+	getgenv().AutoJump = not getgenv().AutoJump
+	JumpBtn.Text = "AUTO JUMP : " .. (getgenv().AutoJump and "ON" or "OFF")
+end)
+
+-- ESP BUTTON
+ESPBtn.MouseButton1Click:Connect(function()
+	getgenv().ESPEnabled = not getgenv().ESPEnabled
+	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
+end)
+
+--================ AUTO JUMP LOOP =================
+task.spawn(function()
+	while true do
+		if getgenv().AutoJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+			Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+		task.wait(0.2)
+	end
+end)
+
+--================ ESP LOOP =================
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local root = plr.Character.HumanoidRootPart
+				if getgenv().ESPEnabled then
+					if not root:FindFirstChild("ESP") then
+						local box = Instance.new("BillboardGui")
+						box.Name = "ESP"
+						box.Size = UDim2.new(0,100,0,50)
+						box.Adornee = root
+						box.AlwaysOnTop = true
+						box.Parent = root
+
+						local label = Instance.new("TextLabel", box)
+						label.Size = UDim2.new(1,0,1,0)
+						label.BackgroundTransparency = 1
+						label.TextColor3 = Color3.fromRGB(0,255,0)
+						label.TextScaled = true
+						label.Font = Enum.Font.SourceSansBold
+						label.Text = plr.Name
+					end
+				else
+					if root:FindFirstChild("ESP") then
+						root.ESP:Destroy()
+					end
+				end
+			end
+		end
+	end
 end)
 
 --================ FPS COUNTER =================
