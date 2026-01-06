@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + AUTO JUMP + ESP
+-- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + INFINITE JUMP + ESP
 -- KEY : ntmr10317
 --==================================================
 
@@ -16,15 +16,16 @@ local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-
-if not UserInputService.TouchEnabled then return end
 local Player = Players.LocalPlayer
 
+if not UserInputService.TouchEnabled then return end
+
+--================ Variables =================
 getgenv().AutoClick = false
 getgenv().AutoSpeed = 0
 getgenv().GravityOn = false
 getgenv().CustomGravity = workspace.Gravity
-getgenv().AutoJump = false
+getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 
 --================ GUI =================
@@ -116,11 +117,11 @@ GravityBtn.TextColor3 = Color3.new(1,1,1)
 GravityBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 Instance.new("UICorner", GravityBtn).CornerRadius = UDim.new(0,10)
 
--- AUTO JUMP BUTTON
+-- INFINITE JUMP BUTTON
 local JumpBtn = Instance.new("TextButton", Frame)
 JumpBtn.Size = UDim2.new(1,-20,0,40)
 JumpBtn.Position = UDim2.new(0,10,0,200)
-JumpBtn.Text = "AUTO JUMP : OFF"
+JumpBtn.Text = "INFINITE JUMP : OFF"
 JumpBtn.TextColor3 = Color3.new(1,1,1)
 JumpBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 Instance.new("UICorner", JumpBtn).CornerRadius = UDim.new(0,10)
@@ -163,7 +164,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
 
---================ AUTO LOOP =================
+--================ AUTO CLICK LOOP =================
 task.spawn(function()
 	while true do
 		if getgenv().AutoClick then
@@ -202,10 +203,10 @@ GravityBtn.MouseButton1Click:Connect(function()
 	GravityBtn.Text = "GRAVITY : " .. (getgenv().GravityOn and "ON" or "OFF")
 end)
 
--- AUTO JUMP BUTTON
+-- INFINITE JUMP BUTTON
 JumpBtn.MouseButton1Click:Connect(function()
-	getgenv().AutoJump = not getgenv().AutoJump
-	JumpBtn.Text = "AUTO JUMP : " .. (getgenv().AutoJump and "ON" or "OFF")
+	getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
+	JumpBtn.Text = "INFINITE JUMP : " .. (getgenv().InfiniteJumpEnabled and "ON" or "OFF")
 end)
 
 -- ESP BUTTON
@@ -214,13 +215,10 @@ ESPBtn.MouseButton1Click:Connect(function()
 	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
 end)
 
---================ AUTO JUMP LOOP =================
-task.spawn(function()
-	while true do
-		if getgenv().AutoJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
-			Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-		end
-		task.wait(0.2)
+--================ INFINITE JUMP LOOP =================
+UserInputService.JumpRequest:Connect(function()
+	if getgenv().InfiniteJumpEnabled and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+		Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 end)
 
