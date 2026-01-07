@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + INFINITE JUMP + ESP
+-- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + INFINITE JUMP + ESP + FOV
 -- KEY : ntmr10317
 --==================================================
 
@@ -71,7 +71,7 @@ Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,10)
 
 --================ MAIN HUB =================
 local Frame = Instance.new("Frame", Gui)
-Frame.Size = UDim2.new(0,220,0,400)
+Frame.Size = UDim2.new(0,220,0,440)
 Frame.Position = UDim2.new(0,10,0,120)
 Frame.Visible = false
 Frame.Active = true
@@ -134,6 +134,24 @@ ESPBtn.Text = "ESP : OFF"
 ESPBtn.TextColor3 = Color3.new(1,1,1)
 ESPBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 Instance.new("UICorner", ESPBtn).CornerRadius = UDim.new(0,10)
+
+-- FOV BOX
+local FOVBox = Instance.new("TextBox", Frame)
+FOVBox.Size = UDim2.new(1,-20,0,35)
+FOVBox.Position = UDim2.new(0,10,0,290)
+FOVBox.PlaceholderText = "Set FOV (default 70)"
+FOVBox.Text = tostring(workspace.CurrentCamera.FieldOfView)
+FOVBox.TextColor3 = Color3.new(1,1,1)
+FOVBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Instance.new("UICorner", FOVBox).CornerRadius = UDim.new(0,8)
+
+local FOVBtn = Instance.new("TextButton", Frame)
+FOVBtn.Size = UDim2.new(1,-20,0,40)
+FOVBtn.Position = UDim2.new(0,10,0,335)
+FOVBtn.Text = "SET FOV"
+FOVBtn.TextColor3 = Color3.new(1,1,1)
+FOVBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+Instance.new("UICorner", FOVBtn).CornerRadius = UDim.new(0,10)
 
 -- FPS LABEL
 local FPSLabel = Instance.new("TextLabel", Frame)
@@ -213,6 +231,14 @@ end)
 ESPBtn.MouseButton1Click:Connect(function()
 	getgenv().ESPEnabled = not getgenv().ESPEnabled
 	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
+end)
+
+-- FOV BUTTON
+FOVBtn.MouseButton1Click:Connect(function()
+	local fov = tonumber(FOVBox.Text)
+	if fov then
+		workspace.CurrentCamera.FieldOfView = fov
+	end
 end)
 
 --================ INFINITE JUMP LOOP =================
