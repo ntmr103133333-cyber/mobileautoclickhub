@@ -1,5 +1,6 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + INFINITE JUMP + ESP + FOV ON/OFF
+-- (SCROLLABLE & DRAGGABLE + Open Hubも一緒に動く)
 -- KEY : ntmr10317
 --==================================================
 
@@ -56,97 +57,66 @@ KeyBtn.TextColor3 = Color3.new(1,1,1)
 KeyBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 Instance.new("UICorner", KeyBtn).CornerRadius = UDim.new(0,8)
 
---================ TOGGLE =================
+--================ TOGGLE BUTTON =================
 local ToggleBtn = Instance.new("TextButton", Gui)
 ToggleBtn.Size = UDim2.new(0,120,0,40)
 ToggleBtn.Position = UDim2.new(0,10,0,70)
 ToggleBtn.Text = "OPEN HUB"
 ToggleBtn.Visible = false
 ToggleBtn.Active = true
-ToggleBtn.Draggable = true
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
 ToggleBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,10)
 
---================ MAIN HUB =================
-local Frame = Instance.new("Frame", Gui)
+--================ MAIN HUB (SCROLLABLE) =================
+local Frame = Instance.new("ScrollingFrame", Gui)
 Frame.Size = UDim2.new(0,220,0,440)
 Frame.Position = UDim2.new(0,10,0,120)
 Frame.Visible = false
 Frame.Active = true
-Frame.Draggable = true
 Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Frame.CanvasSize = UDim2.new(0,0,2,0)
+Frame.ScrollBarThickness = 10
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
 
--- AUTO CLICK BUTTON
-local AutoBtn = Instance.new("TextButton", Frame)
-AutoBtn.Size = UDim2.new(1,-20,0,40)
-AutoBtn.Position = UDim2.new(0,10,0,10)
-AutoBtn.Text = "AUTO CLICK : OFF"
-AutoBtn.TextColor3 = Color3.new(1,1,1)
-AutoBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", AutoBtn).CornerRadius = UDim.new(0,10)
+local UIList = Instance.new("UIListLayout", Frame)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0,10)
 
--- AUTO SPEED
-local SpeedBox = Instance.new("TextBox", Frame)
-SpeedBox.Size = UDim2.new(1,-20,0,35)
-SpeedBox.Position = UDim2.new(0,10,0,60)
-SpeedBox.PlaceholderText = "AUTO SPEED (0 = FAST)"
-SpeedBox.Text = "0"
-SpeedBox.TextColor3 = Color3.new(1,1,1)
-SpeedBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Instance.new("UICorner", SpeedBox).CornerRadius = UDim.new(0,8)
+--================ Helper functions =================
+local function createButton(text)
+	local btn = Instance.new("TextButton", Frame)
+	btn.Size = UDim2.new(1,-20,0,40)
+	btn.Text = text
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+	return btn
+end
 
--- GRAVITY VALUE
-local GravityBox = Instance.new("TextBox", Frame)
-GravityBox.Size = UDim2.new(1,-20,0,35)
-GravityBox.Position = UDim2.new(0,10,0,110)
-GravityBox.Text = tostring(workspace.Gravity)
-GravityBox.PlaceholderText = "Gravity value"
-GravityBox.TextColor3 = Color3.new(1,1,1)
-GravityBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Instance.new("UICorner", GravityBox).CornerRadius = UDim.new(0,8)
+local function createTextBox(placeholder, default)
+	local box = Instance.new("TextBox", Frame)
+	box.Size = UDim2.new(1,-20,0,35)
+	box.PlaceholderText = placeholder
+	box.Text = default or ""
+	box.TextColor3 = Color3.new(1,1,1)
+	box.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
+	return box
+end
 
--- GRAVITY BUTTON
-local GravityBtn = Instance.new("TextButton", Frame)
-GravityBtn.Size = UDim2.new(1,-20,0,40)
-GravityBtn.Position = UDim2.new(0,10,0,155)
-GravityBtn.Text = "GRAVITY : OFF"
-GravityBtn.TextColor3 = Color3.new(1,1,1)
-GravityBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", GravityBtn).CornerRadius = UDim.new(0,10)
-
--- INFINITE JUMP BUTTON
-local JumpBtn = Instance.new("TextButton", Frame)
-JumpBtn.Size = UDim2.new(1,-20,0,40)
-JumpBtn.Position = UDim2.new(0,10,0,200)
-JumpBtn.Text = "INFINITE JUMP : OFF"
-JumpBtn.TextColor3 = Color3.new(1,1,1)
-JumpBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", JumpBtn).CornerRadius = UDim.new(0,10)
-
--- ESP BUTTON
-local ESPBtn = Instance.new("TextButton", Frame)
-ESPBtn.Size = UDim2.new(1,-20,0,40)
-ESPBtn.Position = UDim2.new(0,10,0,245)
-ESPBtn.Text = "ESP : OFF"
-ESPBtn.TextColor3 = Color3.new(1,1,1)
-ESPBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", ESPBtn).CornerRadius = UDim.new(0,10)
-
--- FOV BUTTON
-local FOVBtn = Instance.new("TextButton", Frame)
-FOVBtn.Size = UDim2.new(1,-20,0,40)
-FOVBtn.Position = UDim2.new(0,10,0,290)
-FOVBtn.Text = "FOV : OFF"
-FOVBtn.TextColor3 = Color3.new(1,1,1)
-FOVBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", FOVBtn).CornerRadius = UDim.new(0,10)
+--================ BUTTONS & TEXTBOXES =================
+local AutoBtn = createButton("AUTO CLICK : OFF")
+local SpeedBox = createTextBox("AUTO SPEED (0 = FAST)","0")
+local GravityBox = createTextBox("Gravity value", tostring(workspace.Gravity))
+local GravityBtn = createButton("GRAVITY : OFF")
+local JumpBtn = createButton("INFINITE JUMP : OFF")
+local ESPBtn = createButton("ESP : OFF")
+local FOVBtn = createButton("FOV : OFF")
 
 -- FPS LABEL
 local FPSLabel = Instance.new("TextLabel", Frame)
 FPSLabel.Size = UDim2.new(1,-20,0,30)
-FPSLabel.Position = UDim2.new(0,10,1,-40)
 FPSLabel.BackgroundColor3 = Color3.fromRGB(35,35,35)
 FPSLabel.TextColor3 = Color3.new(1,1,1)
 FPSLabel.Text = "FPS : ..."
@@ -167,39 +137,33 @@ KeyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+--================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
 	Frame.Visible = not Frame.Visible
 	ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
 
 --================ AUTO CLICK LOOP =================
+AutoBtn.MouseButton1Click:Connect(function()
+	getgenv().AutoClick = not getgenv().AutoClick
+	AutoBtn.Text = "AUTO CLICK : " .. (getgenv().AutoClick and "ON" or "OFF")
+end)
+
 task.spawn(function()
 	while true do
 		if getgenv().AutoClick then
 			VirtualUser:Button1Down(Vector2.new(), workspace.CurrentCamera.CFrame)
 			VirtualUser:Button1Up(Vector2.new(), workspace.CurrentCamera.CFrame)
-
 			local speed = tonumber(SpeedBox.Text) or 0
 			getgenv().AutoSpeed = speed
-
-			if speed == 0 then
-				RunService.Heartbeat:Wait()
-			else
-				task.wait(speed)
-			end
+			if speed == 0 then RunService.Heartbeat:Wait() else task.wait(speed) end
 		else
 			task.wait(0.15)
 		end
 	end
 end)
 
--- AUTO BUTTON
-AutoBtn.MouseButton1Click:Connect(function()
-	getgenv().AutoClick = not getgenv().AutoClick
-	AutoBtn.Text = "AUTO CLICK : " .. (getgenv().AutoClick and "ON" or "OFF")
-end)
-
--- GRAVITY BUTTON
+--================ GRAVITY =================
 GravityBtn.MouseButton1Click:Connect(function()
 	getgenv().GravityOn = not getgenv().GravityOn
 	if getgenv().GravityOn then
@@ -211,32 +175,24 @@ GravityBtn.MouseButton1Click:Connect(function()
 	GravityBtn.Text = "GRAVITY : " .. (getgenv().GravityOn and "ON" or "OFF")
 end)
 
--- INFINITE JUMP BUTTON
+--================ INFINITE JUMP =================
 JumpBtn.MouseButton1Click:Connect(function()
 	getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
 	JumpBtn.Text = "INFINITE JUMP : " .. (getgenv().InfiniteJumpEnabled and "ON" or "OFF")
 end)
 
--- ESP BUTTON
-ESPBtn.MouseButton1Click:Connect(function()
-	getgenv().ESPEnabled = not getgenv().ESPEnabled
-	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
-end)
-
--- FOV BUTTON
-FOVBtn.MouseButton1Click:Connect(function()
-	getgenv().FOVEnabled = not getgenv().FOVEnabled
-	FOVBtn.Text = "FOV : " .. (getgenv().FOVEnabled and "ON" or "OFF")
-end)
-
---================ INFINITE JUMP LOOP =================
 UserInputService.JumpRequest:Connect(function()
 	if getgenv().InfiniteJumpEnabled and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
 		Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 end)
 
---================ ESP LOOP =================
+--================ ESP =================
+ESPBtn.MouseButton1Click:Connect(function()
+	getgenv().ESPEnabled = not getgenv().ESPEnabled
+	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
+end)
+
 task.spawn(function()
 	while true do
 		task.wait(0.5)
@@ -251,7 +207,6 @@ task.spawn(function()
 						box.Adornee = root
 						box.AlwaysOnTop = true
 						box.Parent = root
-
 						local label = Instance.new("TextLabel", box)
 						label.Size = UDim2.new(1,0,1,0)
 						label.BackgroundTransparency = 1
@@ -261,11 +216,26 @@ task.spawn(function()
 						label.Text = plr.Name
 					end
 				else
-					if root:FindFirstChild("ESP") then
-						root.ESP:Destroy()
-					end
+					if root:FindFirstChild("ESP") then root.ESP:Destroy() end
 				end
 			end
+		end
+	end
+end)
+
+--================ FOV LOOP =================
+FOVBtn.MouseButton1Click:Connect(function()
+	getgenv().FOVEnabled = not getgenv().FOVEnabled
+	FOVBtn.Text = "FOV : " .. (getgenv().FOVEnabled and "ON" or "OFF")
+end)
+
+task.spawn(function()
+	while true do
+		task.wait()
+		if getgenv().FOVEnabled then
+			workspace.CurrentCamera.FieldOfView = 120
+		else
+			workspace.CurrentCamera.FieldOfView = 70
 		end
 	end
 end)
@@ -274,7 +244,6 @@ end)
 task.spawn(function()
 	local last = os.clock()
 	local frames = 0
-
 	RunService.RenderStepped:Connect(function()
 		frames += 1
 		local now = os.clock()
@@ -286,14 +255,40 @@ task.spawn(function()
 	end)
 end)
 
---================ FOV LOOP =================
-task.spawn(function()
-	while true do
-		task.wait()
-		if getgenv().FOVEnabled then
-			workspace.CurrentCamera.FieldOfView = 120 -- 好きな固定値に設定
-		else
-			workspace.CurrentCamera.FieldOfView = 70 -- デフォルト
-		end
+--================ DRAG HUB + TOGGLE =================
+local dragging = false
+local dragInput, startPos, startFramePos, startTogglePos
+
+local function update(input)
+	local delta = input.Position - startPos
+	Frame.Position = UDim2.new(startFramePos.X.Scale, startFramePos.X.Offset + delta.X,
+		startFramePos.Y.Scale, startFramePos.Y.Offset + delta.Y)
+	ToggleBtn.Position = UDim2.new(startTogglePos.X.Scale, startTogglePos.X.Offset + delta.X,
+		startTogglePos.Y.Scale, startTogglePos.Y.Offset + delta.Y)
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		startPos = input.Position
+		startFramePos = Frame.Position
+		startTogglePos = ToggleBtn.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		update(input)
 	end
 end)
