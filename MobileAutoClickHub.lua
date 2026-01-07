@@ -1,6 +1,8 @@
 --==================================================
--- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS + INFINITE JUMP + ESP + FOV ON/OFF
--- (SCROLLABLE & DRAGGABLE + Open Hubも一緒に動く)
+-- MOBILE AUTO CLICK HUB (FINAL FIX)
+-- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
+-- INFINITE JUMP / ESP / FOV / FLING (OTHERS)
+-- DRAG : ONLY OPEN HUB → MOVE ALL
 -- KEY : ntmr10317
 --==================================================
 
@@ -18,46 +20,46 @@ local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
-
 if not UserInputService.TouchEnabled then return end
 
 --================ Variables =================
 getgenv().AutoClick = false
-getgenv().AutoSpeed = 0
 getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
+getgenv().FlingEnabled = false
+getgenv().FlingDistance = 10
 
 --================ GUI =================
-local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local Gui = Instance.new("ScreenGui", game.CoreGui)
 Gui.Name = "MobileHub"
 getgenv().MobileHub = Gui
 
---================ KEY FRAME =================
+--================ KEY UI =================
 local KeyFrame = Instance.new("Frame", Gui)
 KeyFrame.Size = UDim2.new(0,220,0,140)
 KeyFrame.Position = UDim2.new(0.5,-110,0.5,-70)
 KeyFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner", KeyFrame)
 
 local KeyBox = Instance.new("TextBox", KeyFrame)
 KeyBox.Size = UDim2.new(1,-20,0,35)
 KeyBox.Position = UDim2.new(0,10,0,45)
 KeyBox.PlaceholderText = "Key here"
-KeyBox.TextColor3 = Color3.new(1,1,1)
 KeyBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0,8)
+KeyBox.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", KeyBox)
 
 local KeyBtn = Instance.new("TextButton", KeyFrame)
 KeyBtn.Size = UDim2.new(1,-20,0,35)
 KeyBtn.Position = UDim2.new(0,10,0,90)
 KeyBtn.Text = "UNLOCK"
-KeyBtn.TextColor3 = Color3.new(1,1,1)
 KeyBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-Instance.new("UICorner", KeyBtn).CornerRadius = UDim.new(0,8)
+KeyBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", KeyBtn)
 
---================ TOGGLE BUTTON =================
+--================ OPEN HUB =================
 local ToggleBtn = Instance.new("TextButton", Gui)
 ToggleBtn.Size = UDim2.new(0,120,0,40)
 ToggleBtn.Position = UDim2.new(0,10,0,70)
@@ -66,123 +68,105 @@ ToggleBtn.Visible = false
 ToggleBtn.Active = true
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
 ToggleBtn.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,10)
+Instance.new("UICorner", ToggleBtn)
 
---================ MAIN HUB (SCROLLABLE) =================
+--================ HUB =================
 local Frame = Instance.new("ScrollingFrame", Gui)
 Frame.Size = UDim2.new(0,220,0,440)
 Frame.Position = UDim2.new(0,10,0,120)
 Frame.Visible = false
 Frame.Active = true
-Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Frame.CanvasSize = UDim2.new(0,0,2,0)
-Frame.ScrollBarThickness = 10
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
+Frame.ScrollBarThickness = 8
+Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", Frame)
 
 local UIList = Instance.new("UIListLayout", Frame)
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
 UIList.Padding = UDim.new(0,10)
 
---================ Helper functions =================
-local function createButton(text)
-	local btn = Instance.new("TextButton", Frame)
-	btn.Size = UDim2.new(1,-20,0,40)
-	btn.Text = text
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
-	return btn
+local function btn(t)
+	local b = Instance.new("TextButton", Frame)
+	b.Size = UDim2.new(1,-20,0,40)
+	b.Text = t
+	b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+	b.TextColor3 = Color3.new(1,1,1)
+	Instance.new("UICorner", b)
+	return b
 end
 
-local function createTextBox(placeholder, default)
-	local box = Instance.new("TextBox", Frame)
-	box.Size = UDim2.new(1,-20,0,35)
-	box.PlaceholderText = placeholder
-	box.Text = default or ""
-	box.TextColor3 = Color3.new(1,1,1)
-	box.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	Instance.new("UICorner", box).CornerRadius = UDim.new(0,8)
-	return box
+local function box(ph, d)
+	local t = Instance.new("TextBox", Frame)
+	t.Size = UDim2.new(1,-20,0,35)
+	t.PlaceholderText = ph
+	t.Text = d or ""
+	t.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	t.TextColor3 = Color3.new(1,1,1)
+	Instance.new("UICorner", t)
+	return t
 end
 
---================ BUTTONS & TEXTBOXES =================
-local AutoBtn = createButton("AUTO CLICK : OFF")
-local SpeedBox = createTextBox("AUTO SPEED (0 = FAST)","0")
-local GravityBox = createTextBox("Gravity value", tostring(workspace.Gravity))
-local GravityBtn = createButton("GRAVITY : OFF")
-local JumpBtn = createButton("INFINITE JUMP : OFF")
-local ESPBtn = createButton("ESP : OFF")
-local FOVBtn = createButton("FOV : OFF")
+local AutoBtn = btn("AUTO CLICK : OFF")
+local SpeedBox = box("AUTO SPEED (0 = FAST)", "0")
+local GravityBox = box("GRAVITY", tostring(workspace.Gravity))
+local GravityBtn = btn("GRAVITY : OFF")
+local JumpBtn = btn("INFINITE JUMP : OFF")
+local ESPBtn = btn("ESP : OFF")
+local FOVBtn = btn("FOV : OFF")
+local FlingBtn = btn("FLING (OTHERS) : OFF")
 
--- FPS LABEL
-local FPSLabel = Instance.new("TextLabel", Frame)
-FPSLabel.Size = UDim2.new(1,-20,0,30)
-FPSLabel.BackgroundColor3 = Color3.fromRGB(35,35,35)
-FPSLabel.TextColor3 = Color3.new(1,1,1)
-FPSLabel.Text = "FPS : ..."
-FPSLabel.TextScaled = true
-FPSLabel.Font = Enum.Font.SourceSansBold
-FPSLabel.BorderSizePixel = 0
-Instance.new("UICorner", FPSLabel).CornerRadius = UDim.new(0,8)
+local FPS = Instance.new("TextLabel", Frame)
+FPS.Size = UDim2.new(1,-20,0,30)
+FPS.Text = "FPS : ..."
+FPS.BackgroundColor3 = Color3.fromRGB(35,35,35)
+FPS.TextColor3 = Color3.new(1,1,1)
+FPS.BorderSizePixel = 0
+Instance.new("UICorner", FPS)
 
---================ KEY CHECK =================
+--================ KEY =================
 KeyBtn.MouseButton1Click:Connect(function()
 	if KeyBox.Text == CORRECT_KEY then
 		KeyFrame:Destroy()
 		ToggleBtn.Visible = true
-	else
-		KeyBtn.Text = "WRONG"
-		task.wait(1)
-		KeyBtn.Text = "UNLOCK"
 	end
 end)
 
---================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
 	Frame.Visible = not Frame.Visible
 	ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
 
---================ AUTO CLICK LOOP =================
+--================ AUTO CLICK =================
 AutoBtn.MouseButton1Click:Connect(function()
 	getgenv().AutoClick = not getgenv().AutoClick
-	AutoBtn.Text = "AUTO CLICK : " .. (getgenv().AutoClick and "ON" or "OFF")
+	AutoBtn.Text = "AUTO CLICK : "..(getgenv().AutoClick and "ON" or "OFF")
 end)
 
 task.spawn(function()
 	while true do
 		if getgenv().AutoClick then
-			VirtualUser:Button1Down(Vector2.new(), workspace.CurrentCamera.CFrame)
-			VirtualUser:Button1Up(Vector2.new(), workspace.CurrentCamera.CFrame)
-			local speed = tonumber(SpeedBox.Text) or 0
-			getgenv().AutoSpeed = speed
-			if speed == 0 then RunService.Heartbeat:Wait() else task.wait(speed) end
-		else
-			task.wait(0.15)
-		end
+			VirtualUser:Button1Down(Vector2.zero, workspace.CurrentCamera.CFrame)
+			VirtualUser:Button1Up(Vector2.zero, workspace.CurrentCamera.CFrame)
+			local s = tonumber(SpeedBox.Text) or 0
+			if s == 0 then RunService.Heartbeat:Wait() else task.wait(s) end
+		else task.wait(0.15) end
 	end
 end)
 
 --================ GRAVITY =================
 GravityBtn.MouseButton1Click:Connect(function()
 	getgenv().GravityOn = not getgenv().GravityOn
-	if getgenv().GravityOn then
-		local v = tonumber(GravityBox.Text)
-		if v then workspace.Gravity = v end
-	else
-		workspace.Gravity = 196.2
-	end
-	GravityBtn.Text = "GRAVITY : " .. (getgenv().GravityOn and "ON" or "OFF")
+	workspace.Gravity = getgenv().GravityOn and tonumber(GravityBox.Text) or 196.2
+	GravityBtn.Text = "GRAVITY : "..(getgenv().GravityOn and "ON" or "OFF")
 end)
 
 --================ INFINITE JUMP =================
 JumpBtn.MouseButton1Click:Connect(function()
 	getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
-	JumpBtn.Text = "INFINITE JUMP : " .. (getgenv().InfiniteJumpEnabled and "ON" or "OFF")
+	JumpBtn.Text = "INFINITE JUMP : "..(getgenv().InfiniteJumpEnabled and "ON" or "OFF")
 end)
 
 UserInputService.JumpRequest:Connect(function()
-	if getgenv().InfiniteJumpEnabled and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+	if getgenv().InfiniteJumpEnabled and Player.Character then
 		Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 end)
@@ -190,105 +174,105 @@ end)
 --================ ESP =================
 ESPBtn.MouseButton1Click:Connect(function()
 	getgenv().ESPEnabled = not getgenv().ESPEnabled
-	ESPBtn.Text = "ESP : " .. (getgenv().ESPEnabled and "ON" or "OFF")
+	ESPBtn.Text = "ESP : "..(getgenv().ESPEnabled and "ON" or "OFF")
 end)
 
 task.spawn(function()
-	while true do
-		task.wait(0.5)
-		for _, plr in pairs(Players:GetPlayers()) do
-			if plr ~= Player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-				local root = plr.Character.HumanoidRootPart
+	while task.wait(0.5) do
+		for _,p in pairs(Players:GetPlayers()) do
+			if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+				local r=p.Character.HumanoidRootPart
 				if getgenv().ESPEnabled then
-					if not root:FindFirstChild("ESP") then
-						local box = Instance.new("BillboardGui")
-						box.Name = "ESP"
-						box.Size = UDim2.new(0,100,0,50)
-						box.Adornee = root
-						box.AlwaysOnTop = true
-						box.Parent = root
-						local label = Instance.new("TextLabel", box)
-						label.Size = UDim2.new(1,0,1,0)
-						label.BackgroundTransparency = 1
-						label.TextColor3 = Color3.fromRGB(0,255,0)
-						label.TextScaled = true
-						label.Font = Enum.Font.SourceSansBold
-						label.Text = plr.Name
+					if not r:FindFirstChild("ESP") then
+						local g=Instance.new("BillboardGui",r)
+						g.Name="ESP"
+						g.Size=UDim2.new(0,100,0,40)
+						g.AlwaysOnTop=true
+						g.Adornee=r
+						local t=Instance.new("TextLabel",g)
+						t.Size=UDim2.new(1,0,1,0)
+						t.BackgroundTransparency=1
+						t.Text=p.Name
+						t.TextColor3=Color3.fromRGB(0,255,0)
 					end
-				else
-					if root:FindFirstChild("ESP") then root.ESP:Destroy() end
+				elseif r:FindFirstChild("ESP") then
+					r.ESP:Destroy()
 				end
 			end
 		end
 	end
 end)
 
---================ FOV LOOP =================
+--================ FOV =================
 FOVBtn.MouseButton1Click:Connect(function()
 	getgenv().FOVEnabled = not getgenv().FOVEnabled
-	FOVBtn.Text = "FOV : " .. (getgenv().FOVEnabled and "ON" or "OFF")
+	FOVBtn.Text = "FOV : "..(getgenv().FOVEnabled and "ON" or "OFF")
 end)
 
 task.spawn(function()
-	while true do
-		task.wait()
-		if getgenv().FOVEnabled then
-			workspace.CurrentCamera.FieldOfView = 120
-		else
-			workspace.CurrentCamera.FieldOfView = 70
+	while task.wait() do
+		workspace.CurrentCamera.FieldOfView = getgenv().FOVEnabled and 120 or 70
+	end
+end)
+
+--================ FLING =================
+FlingBtn.MouseButton1Click:Connect(function()
+	getgenv().FlingEnabled = not getgenv().FlingEnabled
+	FlingBtn.Text = "FLING (OTHERS) : "..(getgenv().FlingEnabled and "ON" or "OFF")
+end)
+
+task.spawn(function()
+	while task.wait(0.2) do
+		if not getgenv().FlingEnabled then continue end
+		if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then continue end
+		local my = Player.Character.HumanoidRootPart
+		for _,p in pairs(Players:GetPlayers()) do
+			if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+				local r=p.Character.HumanoidRootPart
+				if (my.Position-r.Position).Magnitude<=getgenv().FlingDistance then
+					local bv=Instance.new("BodyVelocity",r)
+					bv.MaxForce=Vector3.new(1e9,1e9,1e9)
+					bv.Velocity=(r.Position-my.Position).Unit*300+Vector3.new(0,200,0)
+					task.delay(0.2,function() bv:Destroy() end)
+				end
+			end
 		end
 	end
 end)
 
---================ FPS COUNTER =================
-task.spawn(function()
-	local last = os.clock()
-	local frames = 0
-	RunService.RenderStepped:Connect(function()
-		frames += 1
-		local now = os.clock()
-		if now - last >= 1 then
-			FPSLabel.Text = "FPS : " .. frames
-			frames = 0
-			last = now
-		end
-	end)
+--================ FPS =================
+local f,lt=0,os.clock()
+RunService.RenderStepped:Connect(function()
+	f+=1
+	if os.clock()-lt>=1 then
+		FPS.Text="FPS : "..f
+		f=0
+		lt=os.clock()
+	end
 end)
 
---================ DRAG HUB + TOGGLE =================
-local dragging = false
-local dragInput, startPos, startFramePos, startTogglePos
+--================ DRAG (ONLY OPEN HUB) =================
+local dragging=false
+local dragStart,startFrame,startToggle
 
-local function update(input)
-	local delta = input.Position - startPos
-	Frame.Position = UDim2.new(startFramePos.X.Scale, startFramePos.X.Offset + delta.X,
-		startFramePos.Y.Scale, startFramePos.Y.Offset + delta.Y)
-	ToggleBtn.Position = UDim2.new(startTogglePos.X.Scale, startTogglePos.X.Offset + delta.X,
-		startTogglePos.Y.Scale, startTogglePos.Y.Offset + delta.Y)
-end
-
-ToggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		startPos = input.Position
-		startFramePos = Frame.Position
-		startTogglePos = ToggleBtn.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
+ToggleBtn.InputBegan:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then
+		dragging=true
+		dragStart=i.Position
+		startFrame=Frame.Position
+		startToggle=ToggleBtn.Position
+		i.Changed:Connect(function()
+			if i.UserInputState==Enum.UserInputState.End then
+				dragging=false
 			end
 		end)
 	end
 end)
 
-ToggleBtn.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
+UserInputService.InputChanged:Connect(function(i)
+	if dragging and (i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseMovement) then
+		local d=i.Position-dragStart
+		Frame.Position=UDim2.new(startFrame.X.Scale,startFrame.X.Offset+d.X,startFrame.Y.Scale,startFrame.Y.Offset+d.Y)
+		ToggleBtn.Position=UDim2.new(startToggle.X.Scale,startToggle.X.Offset+d.X,startToggle.Y.Scale,startToggle.Y.Offset+d.Y)
 	end
 end)
