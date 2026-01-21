@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FINAL FIX / NO FLING)
+-- MOBILE AUTO CLICK HUB (FINAL / NO FLING)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
 -- INFINITE JUMP / ESP / FOV
 -- DRAG : ONLY OPEN HUB → MOVE ALL
