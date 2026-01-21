@@ -1,7 +1,7 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FINAL FIX)
+-- MOBILE AUTO CLICK HUB (FINAL FIX / NO FLING)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
--- INFINITE JUMP / ESP / FOV / FLING (OTHERS)
+-- INFINITE JUMP / ESP / FOV
 -- DRAG : ONLY OPEN HUB → MOVE ALL
 -- KEY : ntmr10317
 --==================================================
@@ -28,8 +28,6 @@ getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
-getgenv().FlingEnabled = false
-getgenv().FlingDistance = 10
 
 --================ GUI =================
 local Gui = Instance.new("ScreenGui", game.CoreGui)
@@ -112,7 +110,6 @@ local GravityBtn = btn("GRAVITY : OFF")
 local JumpBtn = btn("INFINITE JUMP : OFF")
 local ESPBtn = btn("ESP : OFF")
 local FOVBtn = btn("FOV : OFF")
-local FlingBtn = btn("FLING (OTHERS) : OFF")
 
 local FPS = Instance.new("TextLabel", Frame)
 FPS.Size = UDim2.new(1,-20,0,30)
@@ -148,7 +145,9 @@ task.spawn(function()
 			VirtualUser:Button1Up(Vector2.zero, workspace.CurrentCamera.CFrame)
 			local s = tonumber(SpeedBox.Text) or 0
 			if s == 0 then RunService.Heartbeat:Wait() else task.wait(s) end
-		else task.wait(0.15) end
+		else
+			task.wait(0.15)
+		end
 	end
 end)
 
@@ -180,20 +179,19 @@ end)
 task.spawn(function()
 	while task.wait(0.5) do
 		for _,p in pairs(Players:GetPlayers()) do
-			if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-				local r=p.Character.HumanoidRootPart
+			if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+				local r = p.Character.HumanoidRootPart
 				if getgenv().ESPEnabled then
 					if not r:FindFirstChild("ESP") then
-						local g=Instance.new("BillboardGui",r)
-						g.Name="ESP"
-						g.Size=UDim2.new(0,100,0,40)
-						g.AlwaysOnTop=true
-						g.Adornee=r
-						local t=Instance.new("TextLabel",g)
-						t.Size=UDim2.new(1,0,1,0)
-						t.BackgroundTransparency=1
-						t.Text=p.Name
-						t.TextColor3=Color3.fromRGB(0,255,0)
+						local g = Instance.new("BillboardGui", r)
+						g.Name = "ESP"
+						g.Size = UDim2.new(0,100,0,40)
+						g.AlwaysOnTop = true
+						local t = Instance.new("TextLabel", g)
+						t.Size = UDim2.new(1,0,1,0)
+						t.BackgroundTransparency = 1
+						t.Text = p.Name
+						t.TextColor3 = Color3.fromRGB(0,255,0)
 					end
 				elseif r:FindFirstChild("ESP") then
 					r.ESP:Destroy()
@@ -215,64 +213,41 @@ task.spawn(function()
 	end
 end)
 
---================ FLING =================
-FlingBtn.MouseButton1Click:Connect(function()
-	getgenv().FlingEnabled = not getgenv().FlingEnabled
-	FlingBtn.Text = "FLING (OTHERS) : "..(getgenv().FlingEnabled and "ON" or "OFF")
-end)
-
-task.spawn(function()
-	while task.wait(0.2) do
-		if not getgenv().FlingEnabled then continue end
-		if not Player.Character or not Player.Character:FindFirstChild("HumanoidRootPart") then continue end
-		local my = Player.Character.HumanoidRootPart
-		for _,p in pairs(Players:GetPlayers()) do
-			if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-				local r=p.Character.HumanoidRootPart
-				if (my.Position-r.Position).Magnitude<=getgenv().FlingDistance then
-					local bv=Instance.new("BodyVelocity",r)
-					bv.MaxForce=Vector3.new(1e9,1e9,1e9)
-					bv.Velocity=(r.Position-my.Position).Unit*300+Vector3.new(0,200,0)
-					task.delay(0.2,function() bv:Destroy() end)
-				end
-			end
-		end
-	end
-end)
-
 --================ FPS =================
-local f,lt=0,os.clock()
+local f, lt = 0, os.clock()
 RunService.RenderStepped:Connect(function()
-	f+=1
-	if os.clock()-lt>=1 then
-		FPS.Text="FPS : "..f
-		f=0
-		lt=os.clock()
+	f += 1
+	if os.clock() - lt >= 1 then
+		FPS.Text = "FPS : "..f
+		f = 0
+		lt = os.clock()
 	end
 end)
 
---================ DRAG (ONLY OPEN HUB) =================
-local dragging=false
-local dragStart,startFrame,startToggle
+--================ DRAG =================
+local dragging = false
+local dragStart, startFrame, startToggle
 
 ToggleBtn.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then
-		dragging=true
-		dragStart=i.Position
-		startFrame=Frame.Position
-		startToggle=ToggleBtn.Position
+	if i.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = i.Position
+		startFrame = Frame.Position
+		startToggle = ToggleBtn.Position
 		i.Changed:Connect(function()
-			if i.UserInputState==Enum.UserInputState.End then
-				dragging=false
+			if i.UserInputState == Enum.UserInputState.End then
+				dragging = false
 			end
 		end)
 	end
 end)
 
 UserInputService.InputChanged:Connect(function(i)
-	if dragging and (i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseMovement) then
-		local d=i.Position-dragStart
-		Frame.Position=UDim2.new(startFrame.X.Scale,startFrame.X.Offset+d.X,startFrame.Y.Scale,startFrame.Y.Offset+d.Y)
-		ToggleBtn.Position=UDim2.new(startToggle.X.Scale,startToggle.X.Offset+d.X,startToggle.Y.Scale,startToggle.Y.Offset+d.Y)
+	if dragging and i.UserInputType == Enum.UserInputType.Touch then
+		local d = i.Position - dragStart
+		Frame.Position = UDim2.new(startFrame.X.Scale, startFrame.X.Offset + d.X,
+								   startFrame.Y.Scale, startFrame.Y.Offset + d.Y)
+		ToggleBtn.Position = UDim2.new(startToggle.X.Scale, startToggle.X.Offset + d.X,
+									   startToggle.Y.Scale, startToggle.Y.Offset + d.Y)
 	end
 end)
