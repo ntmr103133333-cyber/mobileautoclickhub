@@ -1,8 +1,8 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FINAL FIX)
+-- MOBILE AUTO CLICK HUB (FINAL iPHONE VERSION)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
 -- INFINITE JUMP / ESP / FOV
--- DRAG : ONLY OPEN HUB → MOVE ALL
+-- DRAG : ONLY TOGGLE BUTTON → MOVE HUB
 -- KEY : ntmr10317
 --==================================================
 
@@ -43,7 +43,7 @@ local MainContainer = Instance.new("Frame", Gui)
 MainContainer.Size = UDim2.new(0,260,0,520)
 MainContainer.Position = UDim2.new(0.5,-130,0.5,-260)
 MainContainer.BackgroundTransparency = 1
-MainContainer.Active = false  -- 背景や他のボタンを押せるように
+MainContainer.Active = false -- 背景や他のボタンを押せる
 
 --================ KEY FRAME =================
 local KeyFrame = Instance.new("Frame", MainContainer)
@@ -139,6 +139,7 @@ KeyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+--================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
     if Frame.Visible then
         getgenv().AutoClick = false
@@ -183,7 +184,7 @@ end)
 
 task.spawn(function()
     while task.wait() do
-        workspace.CurrentCamera.FieldOfView = getgenv().FOVEnabled and 120 or 70
+        Camera.FieldOfView = getgenv().FOVEnabled and 120 or 70
     end
 end)
 
@@ -242,7 +243,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
---================ DRAG (ONLY OPEN HUB) =================
+--================ DRAG (TOGGLE BUTTON ONLY) =================
 local dragging=false
 local dragStart,startFrame,startToggle
 
