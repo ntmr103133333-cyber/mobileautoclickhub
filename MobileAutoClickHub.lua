@@ -1,7 +1,7 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB (FINAL FIX)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
--- INFINITE JUMP / ESP / FOV / SILENT AIM
+-- INFINITE JUMP / ESP / FOV
 -- DRAG : ONLY OPEN HUB → MOVE ALL
 -- KEY : ntmr10317
 --==================================================
@@ -29,8 +29,6 @@ getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
-getgenv().SilentAimEnabled = false
-getgenv().SilentAimLoaded = false
 
 local DEFAULT_FOV = Camera.FieldOfView
 local FOV_VALUE = 90
@@ -45,7 +43,7 @@ local MainContainer = Instance.new("Frame", Gui)
 MainContainer.Size = UDim2.new(0,260,0,520)
 MainContainer.Position = UDim2.new(0.5,-130,0.5,-260)
 MainContainer.BackgroundTransparency = 1
-MainContainer.Active = true
+MainContainer.Active = false  -- 背景や他のボタンを押せるように
 
 --================ KEY FRAME =================
 local KeyFrame = Instance.new("Frame", MainContainer)
@@ -122,7 +120,6 @@ local GravityBtn   = Button("GRAVITY : OFF",145)
 local FOVBtn       = Button("FOV : OFF",190)
 local JumpBtn      = Button("INFINITE JUMP : OFF",235)
 local ESPBtn       = Button("ESP : OFF",280)
-local SilentAimBtn = Button("SILENT AIM : OFF",325)
 
 local FPS = Instance.new("TextLabel", Frame)
 FPS.Size = UDim2.new(1,-20,0,30)
@@ -231,18 +228,6 @@ task.spawn(function()
                 end
             end
         end
-    end
-end)
-
---================ SILENT AIM =================
-SilentAimBtn.MouseButton1Click:Connect(function()
-    getgenv().SilentAimEnabled = not getgenv().SilentAimEnabled
-    SilentAimBtn.Text = "SILENT AIM : "..(getgenv().SilentAimEnabled and "ON" or "OFF")
-    if getgenv().SilentAimEnabled and not getgenv().SilentAimLoaded then
-        getgenv().SilentAimLoaded = true
-        pcall(function()
-            loadstring(game:HttpGet("https://pastebin.com/raw/T3WvQcfs"))()
-        end)
     end
 end)
 
