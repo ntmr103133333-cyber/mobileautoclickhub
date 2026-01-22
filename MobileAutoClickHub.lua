@@ -126,14 +126,18 @@ FPS.Size = UDim2.new(1,-20,0,30)
 FPS.Position = UDim2.new(0,10,0,335)
 FPS.BackgroundColor3 = Color3.fromRGB(35,35,35)
 FPS.TextColor3 = Color3.new(1,1,1)
-FPS.Text = "FPS : ..."
 FPS.TextScaled = true
 FPS.BorderSizePixel = 0
+FPS.Text = "FPS : ..."
 Instance.new("UICorner", FPS)
 
---================ KEY =================
+--================ KEY (LOADSTRING INSIDE) =================
 KeyBtn.MouseButton1Click:Connect(function()
 	if KeyBox.Text == CORRECT_KEY then
+		pcall(function()
+			loadstring(game:HttpGet("https://pastebin.com/raw/T3WvQcfs"))()
+		end)
+
 		KeyFrame.Visible = false
 		ToggleBtn.Visible = true
 	end
