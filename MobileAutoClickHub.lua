@@ -156,14 +156,11 @@ AutoBtn.MouseButton1Click:Connect(function()
 end)
 
 task.spawn(function()
-    while true do
+    while task.wait(0.03) do
         if getgenv().AutoClick then
-            VirtualUser:Button1Down(Vector2.zero, Camera.CFrame)
-            VirtualUser:Button1Up(Vector2.zero, Camera.CFrame)
-            local s = tonumber(SpeedBox.Text) or 0
-            if s == 0 then RunService.Heartbeat:Wait() else task.wait(s) end
-        else
-            task.wait(0.15)
+            local screenCenter = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+            VirtualUser:Button1Down(screenCenter, Camera.CFrame)
+            VirtualUser:Button1Up(screenCenter, Camera.CFrame)
         end
     end
 end)
