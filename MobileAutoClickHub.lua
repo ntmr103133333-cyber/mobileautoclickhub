@@ -3,10 +3,10 @@
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
 -- INFINITE JUMP / ESP / FOV
 -- DRAG : ONLY TOGGLE BUTTON → MOVE HUB
--- KEY : ntmr10317
+-- KEY : 死ねボケカス
 --==================================================
 
-local CORRECT_KEY = "ntmr10317"
+local CORRECT_KEY = "死ねボケカス"
 
 pcall(function()
     if getgenv().MobileHub then
