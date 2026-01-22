@@ -1,6 +1,6 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB + GRAVITY + AUTO SPEED + FPS
--- + FOV + INFINITE JUMP + ESP
+-- + FOV + INFINITE JUMP + ESP + SILENT AIM
 -- DRAG : CLOSE HUB ONLY (MOVE ALL)
 -- KEY : ntmr10317
 --==================================================
@@ -29,6 +29,9 @@ getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
+
+getgenv().SilentAimEnabled = false
+getgenv().SilentAimLoaded = false
 
 local DEFAULT_FOV = Camera.FieldOfView
 local FOV_VALUE = 90
@@ -83,7 +86,7 @@ local Frame = Instance.new("ScrollingFrame", MainContainer)
 Frame.Size = UDim2.new(0,220,0,400)
 Frame.Position = UDim2.new(0,20,0,200)
 Frame.Visible = false
-Frame.CanvasSize = UDim2.new(0,0,0,600)
+Frame.CanvasSize = UDim2.new(0,0,0,650)
 Frame.ScrollBarThickness = 6
 Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Frame.Active = true
@@ -113,17 +116,18 @@ local function Box(ph,y,def)
 end
 
 --================ UI ORDER =================
-local SpeedBox   = Box("AUTO SPEED (0 = FAST)",10,"0")
-local GravityBox = Box("GRAVITY",55,"196.2")
-local AutoBtn    = Button("AUTO CLICK : OFF",100)
-local GravityBtn = Button("GRAVITY : OFF",145)
-local FOVBtn     = Button("FOV : OFF",190)
-local JumpBtn    = Button("INFINITE JUMP : OFF",235)
-local ESPBtn     = Button("ESP : OFF",280)
+local SpeedBox     = Box("AUTO SPEED (0 = FAST)",10,"0")
+local GravityBox   = Box("GRAVITY",55,"196.2")
+local AutoBtn      = Button("AUTO CLICK : OFF",100)
+local GravityBtn   = Button("GRAVITY : OFF",145)
+local FOVBtn       = Button("FOV : OFF",190)
+local JumpBtn      = Button("INFINITE JUMP : OFF",235)
+local ESPBtn       = Button("ESP : OFF",280)
+local SilentAimBtn = Button("SILENT AIM : OFF",325)
 
 local FPS = Instance.new("TextLabel", Frame)
 FPS.Size = UDim2.new(1,-20,0,30)
-FPS.Position = UDim2.new(0,10,0,335)
+FPS.Position = UDim2.new(0,10,0,380)
 FPS.BackgroundColor3 = Color3.fromRGB(35,35,35)
 FPS.TextColor3 = Color3.new(1,1,1)
 FPS.TextScaled = true
@@ -131,13 +135,9 @@ FPS.BorderSizePixel = 0
 FPS.Text = "FPS : ..."
 Instance.new("UICorner", FPS)
 
---================ KEY (LOADSTRING INSIDE) =================
+--================ KEY =================
 KeyBtn.MouseButton1Click:Connect(function()
 	if KeyBox.Text == CORRECT_KEY then
-		pcall(function()
-			loadstring(game:HttpGet("https://pastebin.com/raw/T3WvQcfs"))()
-		end)
-
 		KeyFrame.Visible = false
 		ToggleBtn.Visible = true
 	end
@@ -160,7 +160,11 @@ task.spawn(function()
 			VirtualUser:Button1Down(Vector2.zero, Camera.CFrame)
 			VirtualUser:Button1Up(Vector2.zero, Camera.CFrame)
 			local s = tonumber(SpeedBox.Text) or 0
-			if s == 0 then RunService.Heartbeat:Wait() else task.wait(s) end
+			if s == 0 then
+				RunService.Heartbeat:Wait()
+			else
+				task.wait(s)
+			end
 		else
 			task.wait(0.15)
 		end
@@ -224,29 +228,46 @@ task.spawn(function()
 	end
 end)
 
---================ FPS =================
-local f,lt=0,os.clock()
-RunService.RenderStepped:Connect(function()
-	f+=1
-	if os.clock()-lt>=1 then
-		FPS.Text="FPS : "..f
-		f=0
-		lt=os.clock()
+--================ SILENT AIM (ON / OFF) =================
+SilentAimBtn.MouseButton1Click:Connect(function()
+	getgenv().SilentAimEnabled = not getgenv().SilentAimEnabled
+	SilentAimBtn.Text = "SILENT AIM : "..(getgenv().SilentAimEnabled and "ON" or "OFF")
+
+	if getgenv().SilentAimEnabled and not getgenv().SilentAimLoaded then
+		getgenv().SilentAimLoaded = true
+		pcall(function()
+			loadstring(game:HttpGet("https://pastebin.com/raw/T3WvQcfs"))()
+		end)
+	end
+
+	if not getgenv().SilentAimEnabled then
+		getgenv().SilentAim = false
 	end
 end)
 
---================ DRAG : CLOSE HUB ONLY =================
+--================ FPS =================
+local f,lt = 0, os.clock()
+RunService.RenderStepped:Connect(function()
+	f += 1
+	if os.clock() - lt >= 1 then
+		FPS.Text = "FPS : "..f
+		f = 0
+		lt = os.clock()
+	end
+end)
+
+--================ DRAG =================
 do
 	local dragging=false
 	local dragStart,startPos
 
 	ToggleBtn.InputBegan:Connect(function(i)
-		if i.UserInputType==Enum.UserInputType.Touch then
+		if i.UserInputType == Enum.UserInputType.Touch then
 			dragging=true
 			dragStart=i.Position
 			startPos=MainContainer.Position
 			i.Changed:Connect(function()
-				if i.UserInputState==Enum.UserInputState.End then
+				if i.UserInputState == Enum.UserInputState.End then
 					dragging=false
 				end
 			end)
@@ -254,7 +275,7 @@ do
 	end)
 
 	UserInputService.InputChanged:Connect(function(i)
-		if dragging and i.UserInputType==Enum.UserInputType.Touch then
+		if dragging and i.UserInputType == Enum.UserInputType.Touch then
 			local d=i.Position-dragStart
 			MainContainer.Position=UDim2.new(
 				startPos.X.Scale,startPos.X.Offset+d.X,
