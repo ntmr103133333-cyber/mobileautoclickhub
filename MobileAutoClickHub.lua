@@ -3,10 +3,10 @@
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
 -- INFINITE JUMP / ESP / FOV
 -- DRAG : ONLY TOGGLE BUTTON → MOVE HUB
--- KEY : 死ねボケカス
+-- KEY : ntmr1031
 --==================================================
 
-local CORRECT_KEY = "死ねボケカス"
+local CORRECT_KEY = "ntmr1031"
 
 pcall(function()
     if getgenv().MobileHub then
@@ -31,7 +31,7 @@ getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
 
 local DEFAULT_FOV = Camera.FieldOfView
-local FOV_VALUE = 90
+local FOV_VALUE = 120
 
 --================ GUI ROOT =================
 local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
@@ -43,7 +43,7 @@ local MainContainer = Instance.new("Frame", Gui)
 MainContainer.Size = UDim2.new(0,260,0,520)
 MainContainer.Position = UDim2.new(0.5,-130,0.5,-260)
 MainContainer.BackgroundTransparency = 1
-MainContainer.Active = false -- 背景や他のボタンを押せる
+MainContainer.Active = false
 
 --================ KEY FRAME =================
 local KeyFrame = Instance.new("Frame", MainContainer)
@@ -78,7 +78,7 @@ ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
 ToggleBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", ToggleBtn)
 
---================ MAIN HUB (SCROLL) =================
+--================ MAIN HUB =================
 local Frame = Instance.new("ScrollingFrame", MainContainer)
 Frame.Size = UDim2.new(0,220,0,400)
 Frame.Position = UDim2.new(0,20,0,200)
@@ -112,14 +112,14 @@ local function Box(ph,y,def)
     return t
 end
 
---================ UI ELEMENTS =================
-local SpeedBox     = Box("AUTO SPEED (0 = FAST)",10,"0")
-local GravityBox   = Box("GRAVITY",55,"196.2")
-local AutoBtn      = Button("AUTO CLICK : OFF",100)
-local GravityBtn   = Button("GRAVITY : OFF",145)
-local FOVBtn       = Button("FOV : OFF",190)
-local JumpBtn      = Button("INFINITE JUMP : OFF",235)
-local ESPBtn       = Button("ESP : OFF",280)
+--================ UI =================
+local SpeedBox   = Box("AUTO SPEED (0 = FAST)",10,"0")
+local GravityBox = Box("GRAVITY",55,"196.2")
+local AutoBtn    = Button("AUTO CLICK : OFF",100)
+local GravityBtn = Button("GRAVITY : OFF",145)
+local FOVBtn     = Button("FOV : OFF",190)
+local JumpBtn    = Button("INFINITE JUMP : OFF",235)
+local ESPBtn     = Button("ESP : OFF",280)
 
 local FPS = Instance.new("TextLabel", Frame)
 FPS.Size = UDim2.new(1,-20,0,30)
@@ -141,10 +141,6 @@ end)
 
 --================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
-    if Frame.Visible then
-        getgenv().AutoClick = false
-        AutoBtn.Text = "AUTO CLICK : OFF"
-    end
     Frame.Visible = not Frame.Visible
     ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
@@ -158,9 +154,9 @@ end)
 task.spawn(function()
     while task.wait(0.03) do
         if getgenv().AutoClick then
-            local screenCenter = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-            VirtualUser:Button1Down(screenCenter, Camera.CFrame)
-            VirtualUser:Button1Up(screenCenter, Camera.CFrame)
+            local c = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+            VirtualUser:Button1Down(c, Camera.CFrame)
+            VirtualUser:Button1Up(c, Camera.CFrame)
         end
     end
 end)
@@ -179,12 +175,6 @@ FOVBtn.MouseButton1Click:Connect(function()
     FOVBtn.Text = "FOV : "..(getgenv().FOVEnabled and "ON" or "OFF")
 end)
 
-task.spawn(function()
-    while task.wait() do
-        Camera.FieldOfView = getgenv().FOVEnabled and 120 or 70
-    end
-end)
-
 --================ INFINITE JUMP =================
 JumpBtn.MouseButton1Click:Connect(function()
     getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
@@ -197,7 +187,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
---================ ESP =================
+--================ ESP (ICON + NAME) =================
 ESPBtn.MouseButton1Click:Connect(function()
     getgenv().ESPEnabled = not getgenv().ESPEnabled
     ESPBtn.Text = "ESP : "..(getgenv().ESPEnabled and "ON" or "OFF")
@@ -205,24 +195,35 @@ end)
 
 task.spawn(function()
     while task.wait(0.5) do
-        for _,p in pairs(Players:GetPlayers()) do
-            if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local r=p.Character.HumanoidRootPart
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = p.Character.HumanoidRootPart
+
                 if getgenv().ESPEnabled then
-                    if not r:FindFirstChild("ESP") then
-                        local g=Instance.new("BillboardGui",r)
-                        g.Name="ESP"
-                        g.Size=UDim2.new(0,100,0,40)
-                        g.AlwaysOnTop=true
-                        g.Adornee=r
-                        local t=Instance.new("TextLabel",g)
-                        t.Size=UDim2.new(1,0,1,0)
-                        t.BackgroundTransparency=1
-                        t.Text=p.Name
-                        t.TextColor3=Color3.fromRGB(0,255,0)
+                    if not hrp:FindFirstChild("ESP") then
+                        local gui = Instance.new("BillboardGui", hrp)
+                        gui.Name = "ESP"
+                        gui.Size = UDim2.new(0,120,0,50)
+                        gui.StudsOffset = Vector3.new(0,3,0)
+                        gui.AlwaysOnTop = true
+
+                        local icon = Instance.new("ImageLabel", gui)
+                        icon.Size = UDim2.new(0,24,0,24)
+                        icon.Position = UDim2.new(0,0,0.5,-12)
+                        icon.BackgroundTransparency = 1
+                        icon.Image = "rbxassetid://6031094678"
+
+                        local name = Instance.new("TextLabel", gui)
+                        name.Size = UDim2.new(1,-30,1,0)
+                        name.Position = UDim2.new(0,30,0,0)
+                        name.BackgroundTransparency = 1
+                        name.Text = p.Name
+                        name.TextScaled = true
+                        name.TextColor3 = Color3.fromRGB(0,255,0)
+                        name.Font = Enum.Font.SourceSansBold
                     end
-                elseif r:FindFirstChild("ESP") then
-                    r.ESP:Destroy()
+                elseif hrp:FindFirstChild("ESP") then
+                    hrp.ESP:Destroy()
                 end
             end
         end
@@ -233,19 +234,19 @@ end)
 local f,lt = 0, os.clock()
 RunService.RenderStepped:Connect(function()
     f += 1
-    if os.clock() - lt >= 1 then
+    if os.clock()-lt >= 1 then
         FPS.Text = "FPS : "..f
         f = 0
         lt = os.clock()
     end
 end)
 
---================ DRAG (TOGGLE BUTTON ONLY) =================
+--================ DRAG (TOGGLE ONLY) =================
 local dragging=false
 local dragStart,startFrame,startToggle
 
 ToggleBtn.InputBegan:Connect(function(i)
-    if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then
+    if i.UserInputType==Enum.UserInputType.Touch then
         dragging=true
         dragStart=i.Position
         startFrame=Frame.Position
@@ -259,7 +260,7 @@ ToggleBtn.InputBegan:Connect(function(i)
 end)
 
 UserInputService.InputChanged:Connect(function(i)
-    if dragging and (i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseMovement) then
+    if dragging and i.UserInputType==Enum.UserInputType.Touch then
         local d=i.Position-dragStart
         Frame.Position=UDim2.new(startFrame.X.Scale,startFrame.X.Offset+d.X,startFrame.Y.Scale,startFrame.Y.Offset+d.Y)
         ToggleBtn.Position=UDim2.new(startToggle.X.Scale,startToggle.X.Offset+d.X,startToggle.Y.Scale,startToggle.Y.Offset+d.Y)
