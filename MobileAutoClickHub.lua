@@ -1,12 +1,18 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FINAL COMPACT)
+-- MOBILE AUTO CLICK HUB (FINAL iPHONE COMPACT)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
--- INFINITE JUMP / ESP / FOV
--- DRAG : ONLY TOGGLE BUTTON → MOVE HUB
--- KEY : ntmr1031
+-- INFINITE JUMP / ESP (SIZE CHANGE) / FOV
+-- DRAG : TOGGLE BUTTON → MOVE HUB
+-- KEY + FULLSCREEN LOADING
 --==================================================
 
+----------------- KEY -----------------
 local CORRECT_KEY = "ntmr1031"
+
+----------------- LOADING -----------------
+local LOADING_TITLE = "マンコ中出し"
+local LOADING_SUB   = "Loading..."
+local LOADING_TIME  = 9 -- 秒
 
 pcall(function()
     if getgenv().MobileHub then
@@ -19,16 +25,18 @@ local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 if not UserInputService.TouchEnabled then return end
 
---================ States =================
-getgenv().AutoClick = false
+--================ States (AUTO NEVER REMOVE) =================
+getgenv().AutoClick = getgenv().AutoClick or false
 getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
+getgenv().ESPSize = getgenv().ESPSize or 10
 
 local DEFAULT_FOV = Camera.FieldOfView
 local FOV_VALUE = 120
@@ -40,39 +48,62 @@ getgenv().MobileHub = Gui
 
 --================ MAIN (SMALL) =================
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0,300,0,500)
-Main.Position = UDim2.new(0.5,-150,0.5,-250)
+Main.Size = UDim2.new(0,300,0,520)
+Main.Position = UDim2.new(0.5,-150,0.5,-260)
 Main.BackgroundTransparency = 1
 
---================ KEY =================
+--================ KEY FRAME =================
 local KeyFrame = Instance.new("Frame", Main)
-KeyFrame.Size = UDim2.new(0,200,0,125)
-KeyFrame.Position = UDim2.new(0.5,-100,0.5,-62)
+KeyFrame.Size = UDim2.new(0,220,0,140)
+KeyFrame.Position = UDim2.new(0.5,-110,0.5,-70)
 KeyFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Instance.new("UICorner", KeyFrame)
 
 local KeyBox = Instance.new("TextBox", KeyFrame)
-KeyBox.Size = UDim2.new(1,-16,0,32)
-KeyBox.Position = UDim2.new(0,8,0,42)
+KeyBox.Size = UDim2.new(1,-20,0,34)
+KeyBox.Position = UDim2.new(0,10,0,40)
 KeyBox.PlaceholderText = "Key here"
 KeyBox.TextSize = 16
+KeyBox.ClearTextOnFocus = false
 KeyBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
 KeyBox.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", KeyBox)
 
 local KeyBtn = Instance.new("TextButton", KeyFrame)
-KeyBtn.Size = UDim2.new(1,-16,0,32)
-KeyBtn.Position = UDim2.new(0,8,0,84)
+KeyBtn.Size = UDim2.new(1,-20,0,34)
+KeyBtn.Position = UDim2.new(0,10,0,85)
 KeyBtn.Text = "UNLOCK"
 KeyBtn.TextSize = 16
 KeyBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 KeyBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", KeyBtn)
 
---================ TOGGLE =================
+--================ LOADING SCREEN =================
+local Loading = Instance.new("Frame", Gui)
+Loading.Size = UDim2.new(1,0,1,0)
+Loading.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Loading.Visible = false
+
+local LTitle = Instance.new("TextLabel", Loading)
+LTitle.Size = UDim2.new(1,0,0.2,0)
+LTitle.Position = UDim2.new(0,0,0.35,0)
+LTitle.Text = LOADING_TITLE
+LTitle.TextScaled = true
+LTitle.BackgroundTransparency = 1
+LTitle.TextColor3 = Color3.new(1,1,1)
+
+local LSub = Instance.new("TextLabel", Loading)
+LSub.Size = UDim2.new(1,0,0.1,0)
+LSub.Position = UDim2.new(0,0,0.55,0)
+LSub.Text = LOADING_SUB
+LSub.TextScaled = true
+LSub.BackgroundTransparency = 1
+LSub.TextColor3 = Color3.fromRGB(180,180,180)
+
+--================ TOGGLE BUTTON =================
 local ToggleBtn = Instance.new("TextButton", Main)
 ToggleBtn.Size = UDim2.new(0,140,0,44)
-ToggleBtn.Position = UDim2.new(0,16,0,150)
+ToggleBtn.Position = UDim2.new(0,20,0,160)
 ToggleBtn.Text = "OPEN HUB"
 ToggleBtn.Visible = false
 ToggleBtn.TextScaled = true
@@ -80,23 +111,23 @@ ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
 ToggleBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", ToggleBtn)
 
---================ HUB =================
+--================ HUB FRAME =================
 local Frame = Instance.new("ScrollingFrame", Main)
-Frame.Size = UDim2.new(0,260,0,380)
-Frame.Position = UDim2.new(0,16,0,205)
+Frame.Size = UDim2.new(0,260,0,360)
+Frame.Position = UDim2.new(0,20,0,220)
 Frame.Visible = false
-Frame.CanvasSize = UDim2.new(0,0,0,650)
-Frame.ScrollBarThickness = 5
+Frame.CanvasSize = UDim2.new(0,0,0,720)
+Frame.ScrollBarThickness = 6
 Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Frame.Active = true
 Instance.new("UICorner", Frame)
 
---================ UI BUILD =================
-local function Button(t,y)
+--================ UI BUILDERS =================
+local function Button(text,y)
     local b = Instance.new("TextButton", Frame)
-    b.Size = UDim2.new(1,-16,0,46)
+    b.Size = UDim2.new(1,-16,0,44)
     b.Position = UDim2.new(0,8,0,y)
-    b.Text = t
+    b.Text = text
     b.TextScaled = true
     b.BackgroundColor3 = Color3.fromRGB(45,45,45)
     b.TextColor3 = Color3.new(1,1,1)
@@ -104,12 +135,12 @@ local function Button(t,y)
     return b
 end
 
-local function Box(p,y,d)
+local function Box(ph,y,def)
     local t = Instance.new("TextBox", Frame)
     t.Size = UDim2.new(1,-16,0,40)
     t.Position = UDim2.new(0,8,0,y)
-    t.PlaceholderText = p
-    t.Text = d
+    t.PlaceholderText = ph
+    t.Text = def
     t.TextScaled = true
     t.BackgroundColor3 = Color3.fromRGB(40,40,40)
     t.TextColor3 = Color3.new(1,1,1)
@@ -117,48 +148,55 @@ local function Box(p,y,d)
     return t
 end
 
+--================ UI =================
 local SpeedBox   = Box("AUTO SPEED (0 = FAST)",10,"0")
-local GravityBox = Box("GRAVITY",60,"196.2")
-local AutoBtn    = Button("AUTO CLICK : OFF",110)
-local GravityBtn = Button("GRAVITY : OFF",165)
-local FOVBtn     = Button("FOV : OFF",220)
-local JumpBtn    = Button("INFINITE JUMP : OFF",275)
-local ESPBtn     = Button("ESP : OFF",330)
+local GravityBox = Box("GRAVITY",55,"196.2")
+local ESPSizeBox = Box("ESP SIZE",100,tostring(getgenv().ESPSize))
+
+local AutoBtn    = Button("AUTO CLICK : "..(getgenv().AutoClick and "ON" or "OFF"),150)
+local GravityBtn = Button("GRAVITY : OFF",200)
+local FOVBtn     = Button("FOV : OFF",250)
+local JumpBtn    = Button("INFINITE JUMP : OFF",300)
+local ESPBtn     = Button("ESP : OFF",350)
 
 local FPS = Instance.new("TextLabel", Frame)
-FPS.Size = UDim2.new(1,-16,0,34)
-FPS.Position = UDim2.new(0,8,0,390)
+FPS.Size = UDim2.new(1,-16,0,36)
+FPS.Position = UDim2.new(0,8,0,410)
 FPS.TextScaled = true
 FPS.BackgroundColor3 = Color3.fromRGB(35,35,35)
 FPS.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", FPS)
 
---================ KEY =================
+--================ KEY -> LOADING -> HUB =================
 KeyBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
         KeyFrame.Visible = false
-        ToggleBtn.Visible = true
+        Loading.Visible = true
+        task.delay(LOADING_TIME, function()
+            Loading.Visible = false
+            ToggleBtn.Visible = true
+        end)
     end
 end)
 
+--================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
     Frame.Visible = not Frame.Visible
     ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
 end)
 
---================ AUTO CLICK =================
+--================ AUTO CLICK (NEVER REMOVE) =================
 AutoBtn.MouseButton1Click:Connect(function()
     getgenv().AutoClick = not getgenv().AutoClick
     AutoBtn.Text = "AUTO CLICK : "..(getgenv().AutoClick and "ON" or "OFF")
 end)
 
 task.spawn(function()
-    while true do
-        task.wait(tonumber(SpeedBox.Text) or 0)
+    while task.wait(0.03) do
         if getgenv().AutoClick then
-            local c = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-            VirtualUser:Button1Down(c, Camera.CFrame)
-            VirtualUser:Button1Up(c, Camera.CFrame)
+            local c = Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+            VirtualUser:Button1Down(c,Camera.CFrame)
+            VirtualUser:Button1Up(c,Camera.CFrame)
         end
     end
 end)
@@ -168,12 +206,6 @@ GravityBtn.MouseButton1Click:Connect(function()
     getgenv().GravityOn = not getgenv().GravityOn
     workspace.Gravity = getgenv().GravityOn and (tonumber(GravityBox.Text) or 196.2) or 196.2
     GravityBtn.Text = "GRAVITY : "..(getgenv().GravityOn and "ON" or "OFF")
-end)
-
-GravityBox.FocusLost:Connect(function()
-    if getgenv().GravityOn then
-        workspace.Gravity = tonumber(GravityBox.Text) or 196.2
-    end
 end)
 
 --================ FOV =================
@@ -196,6 +228,15 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
+--================ ESP SIZE INPUT =================
+ESPSizeBox.FocusLost:Connect(function()
+    local v = tonumber(ESPSizeBox.Text)
+    if v then
+        getgenv().ESPSize = math.clamp(v,2,50)
+    end
+    ESPSizeBox.Text = tostring(getgenv().ESPSize)
+end)
+
 --================ ESP =================
 ESPBtn.MouseButton1Click:Connect(function()
     getgenv().ESPEnabled = not getgenv().ESPEnabled
@@ -211,7 +252,6 @@ task.spawn(function()
                     if not r:FindFirstChild("ESP") then
                         local g=Instance.new("BillboardGui",r)
                         g.Name="ESP"
-                        g.Size=UDim2.new(0,110,0,40)
                         g.AlwaysOnTop=true
                         local t=Instance.new("TextLabel",g)
                         t.Size=UDim2.new(1,0,1,0)
@@ -219,6 +259,10 @@ task.spawn(function()
                         t.TextScaled=true
                         t.Text=p.Name
                         t.TextColor3=Color3.fromRGB(0,255,0)
+                    end
+                    local g=r:FindFirstChild("ESP")
+                    if g then
+                        g.Size = UDim2.new(0,getgenv().ESPSize*10,0,getgenv().ESPSize*4)
                     end
                 elseif r:FindFirstChild("ESP") then
                     r.ESP:Destroy()
@@ -239,7 +283,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
---================ DRAG =================
+--================ DRAG (TOGGLE ONLY) =================
 local dragging=false
 local dragStart,startFrame,startToggle
 
