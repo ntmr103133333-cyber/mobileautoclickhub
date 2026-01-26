@@ -28,9 +28,10 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-if not UserInputService.TouchEnabled then return end
+-- コメントアウトでPCでも動作
+-- if not UserInputService.TouchEnabled then return end
 
---================ States (AUTO NEVER REMOVE) =================
+--================ States =================
 getgenv().AutoClick = getgenv().AutoClick or false
 getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
@@ -46,7 +47,7 @@ local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Gui.Name = "MobileHub"
 getgenv().MobileHub = Gui
 
---================ MAIN (SMALL) =================
+--================ MAIN =================
 local Main = Instance.new("Frame", Gui)
 Main.Size = UDim2.new(0,300,0,520)
 Main.Position = UDim2.new(0.5,-150,0.5,-260)
@@ -104,7 +105,7 @@ LSub.TextColor3 = Color3.fromRGB(180,180,180)
 local ToggleBtn = Instance.new("TextButton", Main)
 ToggleBtn.Size = UDim2.new(0,140,0,44)
 ToggleBtn.Position = UDim2.new(0,20,0,160)
-ToggleBtn.Text = "OPEN HUB"
+ToggleBtn.Text = "チンコ" -- 開くボタン名
 ToggleBtn.Visible = false
 ToggleBtn.TextScaled = true
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
@@ -182,10 +183,10 @@ end)
 --================ TOGGLE HUB =================
 ToggleBtn.MouseButton1Click:Connect(function()
     Frame.Visible = not Frame.Visible
-    ToggleBtn.Text = Frame.Visible and "CLOSE HUB" or "OPEN HUB"
+    ToggleBtn.Text = Frame.Visible and "まんこ" or "チンコ" -- 開閉名前変更
 end)
 
---================ AUTO CLICK (NEVER REMOVE) =================
+--================ AUTO CLICK =================
 AutoBtn.MouseButton1Click:Connect(function()
     getgenv().AutoClick = not getgenv().AutoClick
     AutoBtn.Text = "AUTO CLICK : "..(getgenv().AutoClick and "ON" or "OFF")
@@ -228,19 +229,18 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
---================ ESP SIZE INPUT =================
+--================ ESP =================
+ESPBtn.MouseButton1Click:Connect(function()
+    getgenv().ESPEnabled = not getgenv().ESPEnabled
+    ESPBtn.Text = "ESP : "..(getgenv().ESPEnabled and "ON" or "OFF")
+end)
+
 ESPSizeBox.FocusLost:Connect(function()
     local v = tonumber(ESPSizeBox.Text)
     if v then
         getgenv().ESPSize = math.clamp(v,2,50)
     end
     ESPSizeBox.Text = tostring(getgenv().ESPSize)
-end)
-
---================ ESP =================
-ESPBtn.MouseButton1Click:Connect(function()
-    getgenv().ESPEnabled = not getgenv().ESPEnabled
-    ESPBtn.Text = "ESP : "..(getgenv().ESPEnabled and "ON" or "OFF")
 end)
 
 task.spawn(function()
