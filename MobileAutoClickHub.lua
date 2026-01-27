@@ -1,14 +1,14 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB (FINAL iPHONE COMPACT)
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
--- INFINITE JUMP / ESP (SIZE CHANGE) / FOV
+-- INFINITE JUMP / ESP / FOV
 -- LOADING SCREEN : GAUGE + 0/100 (50で5秒, 99で13秒)
 -- DRAG : TOGGLE BUTTON → MOVE HUB
 -- KEY + FULLSCREEN LOADING
 --==================================================
 
 local CORRECT_KEY = "ntmr1031"
-local LOADING_TITLE = "マンコ中出し"
+local LOADING_TITLE = "まんこ穴中出しセックス あーん///blせっくすいくいくおほおほ"
 local LOADING_SUB = "Loading..."
 local LOADING_TIME = 9
 
@@ -22,7 +22,6 @@ local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
@@ -31,7 +30,7 @@ getgenv().GravityOn = false
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled = false
 getgenv().FOVEnabled = false
-getgenv().ESPSize = getgenv().ESPSize or 10
+getgenv().ESPSize = getgenv().ESPSize or 120
 local DEFAULT_FOV = Camera.FieldOfView
 local FOV_VALUE = 120
 
@@ -70,7 +69,8 @@ KeyBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", KeyBtn)
 
 local Loading = Instance.new("Frame", Gui)
-Loading.Size = UDim2.new(1,0,1,0)
+Loading.Size = UDim2.new(0,920,0,520)
+Loading.Position = UDim2.new(0.5,-460,0.5,-260)
 Loading.BackgroundColor3 = Color3.fromRGB(10,10,10)
 Loading.Visible = false
 
@@ -111,7 +111,7 @@ LoadText.Text = "0 / 100"
 local ToggleBtn = Instance.new("TextButton", Main)
 ToggleBtn.Size = UDim2.new(0,140,0,44)
 ToggleBtn.Position = UDim2.new(0,20,0,160)
-ToggleBtn.Text = "チンコ"
+ToggleBtn.Text = "まんこ"
 ToggleBtn.Visible = false
 ToggleBtn.TextScaled = true
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
@@ -155,7 +155,7 @@ end
 
 local SpeedBox   = Box("AUTO SPEED (0 = FAST)",10,"0")
 local GravityBox = Box("GRAVITY",55,"196.2")
-local ESPSizeBox = Box("ESP SIZE",100,tostring(getgenv().ESPSize))
+local ESPSizeBox = Box("ESP SIZE (2~50)",100,tostring(getgenv().ESPSize))
 
 local AutoBtn    = Button("AUTO CLICK : OFF",150)
 local GravityBtn = Button("GRAVITY : OFF",200)
@@ -198,7 +198,7 @@ end)
 
 ToggleBtn.MouseButton1Click:Connect(function()
     Frame.Visible = not Frame.Visible
-    ToggleBtn.Text = Frame.Visible and "まんこ" or "チンコ"
+    ToggleBtn.Text = Frame.Visible and "まんこ" or "ちんこ"
 end)
 
 AutoBtn.MouseButton1Click:Connect(function()
