@@ -3,6 +3,7 @@
 -- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
 -- INFINITE JUMP / ESP / FOV / PLAYER TP
 -- DRAG OK / FAKE LOADING (50=6s, 99=13s)
+-- + AIMBOT MOBILE (MERGED)
 --==================================================
 
 --================ SERVICES =================
@@ -28,6 +29,7 @@ getgenv().ESPSize = getgenv().ESPSize or 120
 local DEFAULT_FOV, FOV_VALUE = Camera.FieldOfView, 120
 
 --================ GUI ROOT =================
+pcall(function() if getgenv().MobileHub then getgenv().MobileHub:Destroy() end end)
 local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 Gui.Name = "MobileHub"
 getgenv().MobileHub = Gui
@@ -183,28 +185,33 @@ KeyBtn.MouseButton1Click:Connect(function()
     LoadText.Text="0 / 100"
 
     task.spawn(function()
-        -- 0 -> 50
         for i=0,50 do
             LoadBar.Size=UDim2.new(i/100,0,1,0)
             LoadText.Text=i.." / 100"
             task.wait(LOADING_TIME/100)
         end
-        task.wait(6) -- fake stop at 50
+        task.wait(6)
 
-        -- 51 -> 99
         for i=51,99 do
             LoadBar.Size=UDim2.new(i/100,0,1,0)
             LoadText.Text=i.." / 100"
             task.wait(LOADING_TIME/100)
         end
-        task.wait(13) -- fake stop at 99
+        task.wait(13)
 
-        -- 100
         LoadBar.Size=UDim2.new(1,0,1,0)
         LoadText.Text="100 / 100"
         task.wait(0.5)
         Loading.Visible=false
         ToggleBtn.Visible=true
+
+        --========== AIMBOT MOBILE (MERGED) ==========
+        pcall(function()
+            loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"
+            ))()
+        end)
+        --===========================================
     end)
 end)
 
@@ -309,7 +316,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
---================ DRAG (TOGGLE + FRAME) =================
+--================ DRAG =================
 local dragging=false
 local dragStart,startFrame,startToggle
 ToggleBtn.InputBegan:Connect(function(i)
