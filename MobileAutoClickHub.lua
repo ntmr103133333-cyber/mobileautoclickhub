@@ -1,284 +1,166 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB (FULL VERSION / SPIN 99999)
+-- Rayfield Edition (Original Text Preserved)
 --==================================================
 
---================ SERVICES =================
-local Players       = game:GetService("Players")
-local RunService    = game:GetService("RunService")
-local UIS           = game:GetService("UserInputService")
-local VirtualUser   = game:GetService("VirtualUser")
-local Player        = Players.LocalPlayer
-local Camera        = workspace.CurrentCamera
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
---================ SETTINGS =================
+-- 設定とテキストの保持
 local CORRECT_KEY   = "ntmr1031"
 local LOADING_TITLE = "まんこ穴中出しセックス あーん///blせっくすいくいくおほおほ"
-local LOADING_SUB, LOADING_TIME = "Loading...", 9
+local TOGGLE_TEXT_ON = "まんこ"
+local TOGGLE_TEXT_OFF = "ちんこ"
 
-getgenv().AutoClick           = false
-getgenv().GravityOn           = false
+local Window = Rayfield:CreateWindow({
+   Name = "MOBILE AUTO CLICK HUB",
+   LoadingTitle = LOADING_TITLE, -- 元のテキストをロード画面に使用
+   LoadingSubtitle = "Loading...",
+   ConfigurationSaving = {
+      Enabled = false
+   },
+   KeySystem = true,
+   KeySettings = {
+      Title = "Key System",
+      Subtitle = "Enter Key",
+      Note = "Key is: ntmr1031",
+      FileName = "MobileHubKey",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {CORRECT_KEY}
+   }
+})
+
+--================ SERVICES =================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
+local Player = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--================ GLOBALS =================
+getgenv().AutoClick = false
+getgenv().SpinEnabled = false
+getgenv().SpinSpeed = 99999
 getgenv().InfiniteJumpEnabled = false
-getgenv().ESPEnabled          = false
-getgenv().FOVEnabled          = false
-getgenv().ESPSize             = getgenv().ESPSize or 120
-getgenv().SpinEnabled         = false
-getgenv().SpinSpeed           = 99999 -- 爆速設定
+getgenv().ESPEnabled = false
+getgenv().ESPSize = 120
 
-local DEFAULT_FOV, FOV_VALUE = Camera.FieldOfView, 120
+--================ TABS =================
+local MainTab = Window:CreateTab(TOGGLE_TEXT_ON, 4483362458) -- タブ名を元のテキストに
+local VisualTab = Window:CreateTab("Visuals", 4483362458)
 
---================ GUI ROOT =================
-pcall(function()
-    if getgenv().MobileHub then
-        getgenv().MobileHub:Destroy()
+--================ MAIN FUNCTIONS =================
+
+-- Auto Click
+MainTab:CreateToggle({
+   Name = "AUTO CLICK",
+   CurrentValue = false,
+   Callback = function(Value)
+      getgenv().AutoClick = Value
+   end,
+})
+
+-- Spin Bot
+MainTab:CreateToggle({
+   Name = "SPIN",
+   CurrentValue = false,
+   Callback = function(Value)
+      getgenv().SpinEnabled = Value
+   end,
+})
+
+MainTab:CreateInput({
+   Name = "SPIN SPEED",
+   PlaceholderText = "99999",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      getgenv().SpinSpeed = tonumber(Text) or 99999
+   end,
+})
+
+-- Gravity
+MainTab:CreateInput({
+   Name = "GRAVITY (Default: 196.2)",
+   PlaceholderText = "196.2",
+   Callback = function(Text)
+      workspace.Gravity = tonumber(Text) or 196.2
+   end,
+})
+
+-- Infinite Jump
+MainTab:CreateToggle({
+   Name = "INFINITE JUMP",
+   CurrentValue = false,
+   Callback = function(Value)
+      getgenv().InfiniteJumpEnabled = Value
+   end,
+})
+
+--================ VISUAL FUNCTIONS =================
+
+-- ESP
+VisualTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Callback = function(Value)
+      getgenv().ESPEnabled = Value
+   end,
+})
+
+VisualTab:CreateInput({
+   Name = "ESP SIZE (2~50)",
+   PlaceholderText = "120",
+   Callback = function(Text)
+      getgenv().ESPSize = tonumber(Text) or 120
+   end,
+})
+
+-- FOV
+VisualTab:CreateToggle({
+   Name = "FOV (120)",
+   CurrentValue = false,
+   Callback = function(Value)
+      Camera.FieldOfView = Value and 120 or 70
+   end,
+})
+
+--================ LOGIC LOOPS =================
+
+-- Spin
+RunService.RenderStepped:Connect(function()
+    if getgenv().SpinEnabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = Player.Character.HumanoidRootPart
+        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
     end
 end)
 
-local Gui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-Gui.Name = "MobileHub"
-getgenv().MobileHub = Gui
-
-local function NewUICorner(obj)
-    Instance.new("UICorner", obj)
-end
-
-local function NewButton(parent,text,posY)
-    local b = Instance.new("TextButton", parent)
-    b.Size            = UDim2.new(1, -16, 0, 44)
-    b.Position        = UDim2.new(0, 8, 0, posY)
-    b.Text            = text
-    b.TextScaled      = true
-    b.BackgroundColor3= Color3.fromRGB(45, 45, 45)
-    b.TextColor3      = Color3.new(1, 1, 1)
-    NewUICorner(b)
-    return b
-end
-
-local function NewBox(parent,placeholder,posY,default)
-    local t = Instance.new("TextBox", parent)
-    t.Size            = UDim2.new(1, -16, 0, 40)
-    t.Position        = UDim2.new(0, 8, 0, posY)
-    t.PlaceholderText = placeholder
-    t.Text            = default
-    t.TextScaled      = true
-    t.BackgroundColor3= Color3.fromRGB(40, 40, 40)
-    t.TextColor3      = Color3.new(1, 1, 1)
-    NewUICorner(t)
-    return t
-end
-
---================ MAIN FRAMES =================
-local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0, 300, 0, 520)
-Main.Position = UDim2.new(0.5, -150, 0.5, -260)
-Main.BackgroundTransparency = 1
-
-local KeyFrame = Instance.new("Frame", Main)
-KeyFrame.Size = UDim2.new(0, 220, 0, 140)
-KeyFrame.Position = UDim2.new(0.5, -110, 0.5, -70)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-NewUICorner(KeyFrame)
-
-local KeyBox = NewBox(KeyFrame, "Key here", 40, "")
-local KeyBtn = NewButton(KeyFrame, "UNLOCK", 85)
-
-local Loading = Instance.new("Frame", Gui)
-Loading.Size = UDim2.new(0, 920, 0, 520)
-Loading.Position = UDim2.new(0.5, -460, 0.5, -260)
-Loading.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-Loading.Visible = false
-
-local LTitle = Instance.new("TextLabel", Loading)
-LTitle.Size = UDim2.new(1, 0, 0.2, 0)
-LTitle.Position = UDim2.new(0, 0, 0.35, 0)
-LTitle.Text = LOADING_TITLE
-LTitle.TextScaled = true
-LTitle.BackgroundTransparency = 1
-LTitle.TextColor3 = Color3.new(1, 1, 1)
-
-local LSub = Instance.new("TextLabel", Loading)
-LSub.Size = UDim2.new(1, 0, 0.1, 0)
-LSub.Position = UDim2.new(0, 0, 0.55, 0)
-LSub.Text = LOADING_SUB
-LSub.TextScaled = true
-LSub.BackgroundTransparency = 1
-LSub.TextColor3 = Color3.fromRGB(180, 180, 180)
-
-local LoadBack = Instance.new("Frame", Loading)
-LoadBack.Size = UDim2.new(0.6, 0, 0, 26)
-LoadBack.Position = UDim2.new(0.2, 0, 0.65, 0)
-LoadBack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-NewUICorner(LoadBack)
-
-local LoadBar = Instance.new("Frame", LoadBack)
-LoadBar.Size = UDim2.new(0, 0, 1, 0)
-LoadBar.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-NewUICorner(LoadBar)
-
-local LoadText = Instance.new("TextLabel", LoadBack)
-LoadText.Size = UDim2.new(1, 0, 1, 0)
-LoadText.BackgroundTransparency = 1
-LoadText.TextScaled = true
-LoadText.TextColor3 = Color3.new(1, 1, 1)
-LoadText.Text = "0 / 100"
-
-local ToggleBtn = Instance.new("TextButton", Main)
-ToggleBtn.Size = UDim2.new(0, 140, 0, 44)
-ToggleBtn.Position = UDim2.new(0, 20, 0, 160)
-ToggleBtn.Text = "まんこ"
-ToggleBtn.Visible = false
-ToggleBtn.TextScaled = true
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-NewUICorner(ToggleBtn)
-
-local Frame = Instance.new("ScrollingFrame", Main)
-Frame.Size = UDim2.new(0, 260, 0, 360)
-Frame.Position = UDim2.new(0, 20, 0, 220)
-Frame.Visible = false
-Frame.CanvasSize = UDim2.new(0, 0, 0, 940) -- スピン要素分拡張
-Frame.ScrollBarThickness = 6
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.Active = true
-NewUICorner(Frame)
-
---================ UI ELEMENTS =================
-local SpeedBox = NewBox(Frame, "AUTO SPEED (0 = FAST)", 10, "0")
-local GravityBox = NewBox(Frame, "GRAVITY", 55, "196.2")
-local ESPSizeBox = NewBox(Frame, "ESP SIZE (2~50)", 100, tostring(getgenv().ESPSize))
-
-local AutoBtn = NewButton(Frame, "AUTO CLICK : OFF", 150)
-local GravityBtn = NewButton(Frame, "GRAVITY : OFF", 200)
-local FOVBtn = NewButton(Frame, "FOV : OFF", 250)
-local JumpBtn = NewButton(Frame, "INFINITE JUMP : OFF", 300)
-local ESPBtn = NewButton(Frame, "ESP : OFF", 350)
-
-local FPS = Instance.new("TextLabel", Frame)
-FPS.Size = UDim2.new(1, -16, 0, 36)
-FPS.Position = UDim2.new(0, 8, 0, 410)
-FPS.TextScaled = true
-FPS.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-FPS.TextColor3 = Color3.new(1, 1, 1)
-NewUICorner(FPS)
-
-local TPBox = NewBox(Frame, "PLAYER NAME", 460, "")
-local TPBtn = NewButton(Frame, "TELEPORT TO PLAYER", 510)
-
---================ SPIN UI (MODIFIED) =================
-local SpinSpeedBox = NewBox(Frame, "SPIN SPEED", 560, "99999")
-local SpinBtn      = NewButton(Frame, "SPIN : OFF", 610)
-
-SpinSpeedBox.FocusLost:Connect(function()
-    local v = tonumber(SpinSpeedBox.Text)
-    if v then
-        getgenv().SpinSpeed = v -- 制限解除
-    end
-    SpinSpeedBox.Text = tostring(getgenv().SpinSpeed)
-end)
-
-SpinBtn.MouseButton1Click:Connect(function()
-    getgenv().SpinEnabled = not getgenv().SpinEnabled
-    SpinBtn.Text = "SPIN : "..(getgenv().SpinEnabled and "ON" or "OFF")
-end)
-
---================ KEY & AIMBOT LOAD =================
-KeyBtn.MouseButton1Click:Connect(function()
-    if KeyBox.Text ~= CORRECT_KEY then return end
-    KeyFrame.Visible = false
-    Loading.Visible = true
-    LoadBar.Size = UDim2.new(0, 0, 1, 0)
-    LoadText.Text = "0 / 100"
-
-    task.spawn(function()
-        -- 0 to 50
-        for i = 0, 50 do
-            LoadBar.Size = UDim2.new(i/100, 0, 1, 0)
-            LoadText.Text = i.." / 100"
-            task.wait(LOADING_TIME/100)
-        end
-        task.wait(6)
-        -- 51 to 99
-        for i = 51, 99 do
-            LoadBar.Size = UDim2.new(i/100, 0, 1, 0)
-            LoadText.Text = i.." / 100"
-            task.wait(LOADING_TIME/100)
-        end
-        task.wait(13)
-
-        LoadBar.Size = UDim2.new(1, 0, 1, 0)
-        LoadText.Text = "100 / 100"
-        task.wait(0.5)
-
-        Loading.Visible = false
-        ToggleBtn.Visible = true
-
-        -- AIMBOT MOBILEの読み込みを確実に実行
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
-        end)
-    end)
-end)
-
---================ TOGGLES =================
-ToggleBtn.MouseButton1Click:Connect(function()
-    Frame.Visible = not Frame.Visible
-    ToggleBtn.Text = Frame.Visible and "まんこ" or "ちんこ"
-end)
-
-AutoBtn.MouseButton1Click:Connect(function()
-    getgenv().AutoClick = not getgenv().AutoClick
-    AutoBtn.Text = "AUTO CLICK : "..(getgenv().AutoClick and "ON" or "OFF")
-end)
-
-GravityBtn.MouseButton1Click:Connect(function()
-    getgenv().GravityOn = not getgenv().GravityOn
-    workspace.Gravity = getgenv().GravityOn and (tonumber(GravityBox.Text) or 196.2) or 196.2
-    GravityBtn.Text = "GRAVITY : "..(getgenv().GravityOn and "ON" or "OFF")
-end)
-
-FOVBtn.MouseButton1Click:Connect(function()
-    getgenv().FOVEnabled = not getgenv().FOVEnabled
-    Camera.FieldOfView = getgenv().FOVEnabled and FOV_VALUE or DEFAULT_FOV
-    FOVBtn.Text = "FOV : "..(getgenv().FOVEnabled and "ON" or "OFF")
-end)
-
-JumpBtn.MouseButton1Click:Connect(function()
-    getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
-    JumpBtn.Text = "INFINITE JUMP : "..(getgenv().InfiniteJumpEnabled and "ON" or "OFF")
-end)
-
-ESPBtn.MouseButton1Click:Connect(function()
-    getgenv().ESPEnabled = not getgenv().ESPEnabled
-    ESPBtn.Text = "ESP : "..(getgenv().ESPEnabled and "ON" or "OFF")
-end)
-
-ESPSizeBox.FocusLost:Connect(function()
-    local v = tonumber(ESPSizeBox.Text)
-    if v then getgenv().ESPSize = math.clamp(v, 2, 50) end
-    ESPSizeBox.Text = tostring(getgenv().ESPSize)
-end)
-
---================ PLAYER TP =================
-TPBtn.MouseButton1Click:Connect(function()
-    local name = TPBox.Text
-    if name == "" then return end
-    for _, p in pairs(Players:GetPlayers()) do
-        if string.lower(p.Name) == string.lower(name) then
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart")
-            and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                Player.Character.HumanoidRootPart.CFrame =
-                    p.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
-            end
+-- Auto Click
+task.spawn(function()
+    while task.wait(0.03) do
+        if getgenv().AutoClick then
+            local c = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+            VirtualUser:Button1Down(c, Camera.CFrame)
+            VirtualUser:Button1Up(c, Camera.CFrame)
         end
     end
 end)
 
---================ ESP LOGIC =================
+-- Infinite Jump
+UIS.JumpRequest:Connect(function()
+    if getgenv().InfiniteJumpEnabled and Player.Character then
+        local h = Player.Character:FindFirstChildOfClass("Humanoid")
+        if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+-- ESP
 task.spawn(function()
     while task.wait(0.5) do
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local r = p.Character.HumanoidRootPart
-                if getgenv().ESPEnabled then
+        if getgenv().ESPEnabled then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local r = p.Character.HumanoidRootPart
                     if not r:FindFirstChild("ESP") then
                         local g = Instance.new("BillboardGui", r)
                         g.Name = "ESP"
@@ -291,77 +173,19 @@ task.spawn(function()
                         t.TextColor3 = Color3.fromRGB(0,255,0)
                     end
                     r.ESP.Size = UDim2.new(0, getgenv().ESPSize*10, 0, getgenv().ESPSize*4)
-                elseif r:FindFirstChild("ESP") then
-                    r.ESP:Destroy()
+                end
+            end
+        else
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character.HumanoidRootPart:FindFirstChild("ESP") then
+                    p.Character.HumanoidRootPart.ESP:Destroy()
                 end
             end
         end
     end
 end)
 
---================ AUTO CLICK LOGIC =================
-task.spawn(function()
-    while task.wait(0.03) do
-        if getgenv().AutoClick then
-            local c = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-            VirtualUser:Button1Down(c, Camera.CFrame)
-            VirtualUser:Button1Up(c, Camera.CFrame)
-        end
-    end
-end)
-
---================ FPS DISPLAY =================
-local f, lt = 0, os.clock()
-RunService.RenderStepped:Connect(function()
-    f += 1
-    if os.clock() - lt >= 1 then
-        FPS.Text = "FPS : "..f
-        f = 0
-        lt = os.clock()
-    end
-end)
-
---================ DRAG LOGIC =================
-local dragging = false
-local dragStart, startFrame, startToggle
-ToggleBtn.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = i.Position
-        startFrame = Frame.Position
-        startToggle = ToggleBtn.Position
-        i.Changed:Connect(function()
-            if i.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-UIS.InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.Touch then
-        local d = i.Position - dragStart
-        Frame.Position = UDim2.new(startFrame.X.Scale, startFrame.X.Offset + d.X, startFrame.Y.Scale, startFrame.Y.Offset + d.Y)
-        ToggleBtn.Position = UDim2.new(startToggle.X.Scale, startToggle.X.Offset + d.X, startToggle.Y.Scale, startToggle.Y.Offset + d.Y)
-    end
-end)
-
---================ INFINITE JUMP =================
-UIS.JumpRequest:Connect(function()
-    if getgenv().InfiniteJumpEnabled and Player.Character then
-        local h = Player.Character:FindFirstChildOfClass("Humanoid")
-        if h then
-            h:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end)
-
---================ PLAYER SPIN LOGIC =================
-RunService.RenderStepped:Connect(function()
-    if getgenv().SpinEnabled then
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = Player.Character.HumanoidRootPart
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
-        end
-    end
+-- Aimbot Load
+pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
 end)
