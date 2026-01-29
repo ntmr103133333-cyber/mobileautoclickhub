@@ -168,7 +168,6 @@ local TPBtn = NewButton(Frame, "TELEPORT TO PLAYER", 510)
 --================ FAKE LOADING / KEY =================
 KeyBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text ~= CORRECT_KEY then return end
-
     KeyFrame.Visible = false
     Loading.Visible = true
     LoadBar.Size = UDim2.new(0, 0, 1, 0)
@@ -181,7 +180,6 @@ KeyBtn.MouseButton1Click:Connect(function()
             task.wait(LOADING_TIME/100)
         end
         task.wait(6)
-
         for i = 51, 99 do
             LoadBar.Size = UDim2.new(i/100, 0, 1, 0)
             LoadText.Text = i.." / 100"
@@ -202,7 +200,7 @@ KeyBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
---================ TOGGLES / AUTO CLICK / GRAVITY / FOV / JUMP / ESP =================
+--================ TOGGLES =================
 ToggleBtn.MouseButton1Click:Connect(function()
     Frame.Visible = not Frame.Visible
     ToggleBtn.Text = Frame.Visible and "まんこ" or "ちんこ"
@@ -249,7 +247,8 @@ TPBtn.MouseButton1Click:Connect(function()
         if string.lower(p.Name) == string.lower(name) then
             if p.Character and p.Character:FindFirstChild("HumanoidRootPart")
             and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
+                Player.Character.HumanoidRootPart.CFrame =
+                    p.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-3)
             end
         end
     end
@@ -271,7 +270,7 @@ task.spawn(function()
                         t.BackgroundTransparency = 1
                         t.TextScaled = true
                         t.Text = p.Name
-                        t.TextColor3 = Color3.fromRGB(0, 255, 0)
+                        t.TextColor3 = Color3.fromRGB(0,255,0)
                     end
                     r.ESP.Size = UDim2.new(0, getgenv().ESPSize*10, 0, getgenv().ESPSize*4)
                 elseif r:FindFirstChild("ESP") then
@@ -335,6 +334,38 @@ UIS.JumpRequest:Connect(function()
         local h = Player.Character:FindFirstChildOfClass("Humanoid")
         if h then
             h:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+--================ PLAYER SPIN UI (SELF ONLY) =================
+getgenv().SpinEnabled = false
+getgenv().SpinSpeed   = 5
+
+Frame.CanvasSize = UDim2.new(0, 0, 0, 940)
+
+local SpinSpeedBox = NewBox(Frame, "SPIN SPEED", 560, tostring(getgenv().SpinSpeed))
+local SpinBtn      = NewButton(Frame, "SPIN : OFF", 610)
+
+SpinSpeedBox.FocusLost:Connect(function()
+    local v = tonumber(SpinSpeedBox.Text)
+    if v then
+        getgenv().SpinSpeed = math.clamp(v, 0, 100)
+    end
+    SpinSpeedBox.Text = tostring(getgenv().SpinSpeed)
+end)
+
+SpinBtn.MouseButton1Click:Connect(function()
+    getgenv().SpinEnabled = not getgenv().SpinEnabled
+    SpinBtn.Text = "SPIN : "..(getgenv().SpinEnabled and "ON" or "OFF")
+end)
+
+--================ PLAYER SPIN LOGIC =================
+RunService.RenderStepped:Connect(function()
+    if getgenv().SpinEnabled then
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = Player.Character.HumanoidRootPart
+            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
         end
     end
 end)
