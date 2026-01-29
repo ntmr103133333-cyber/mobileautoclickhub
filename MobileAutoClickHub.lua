@@ -1,9 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (COMPACT / ALL-IN-ONE)
--- AUTO CLICK / AUTO SPEED / GRAVITY / FPS
--- INFINITE JUMP / ESP / FOV / PLAYER TP
--- DRAG OK / FAKE LOADING (50=6s, 99=13s)
--- + AIMBOT MOBILE (MERGED)
+-- MOBILE AUTO CLICK HUB (FULL VERSION / SPIN 99999)
 --==================================================
 
 --================ SERVICES =================
@@ -25,6 +21,8 @@ getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled          = false
 getgenv().FOVEnabled          = false
 getgenv().ESPSize             = getgenv().ESPSize or 120
+getgenv().SpinEnabled         = false
+getgenv().SpinSpeed           = 99999 -- 爆速設定
 
 local DEFAULT_FOV, FOV_VALUE = Camera.FieldOfView, 120
 
@@ -137,7 +135,7 @@ local Frame = Instance.new("ScrollingFrame", Main)
 Frame.Size = UDim2.new(0, 260, 0, 360)
 Frame.Position = UDim2.new(0, 20, 0, 220)
 Frame.Visible = false
-Frame.CanvasSize = UDim2.new(0, 0, 0, 860)
+Frame.CanvasSize = UDim2.new(0, 0, 0, 940) -- スピン要素分拡張
 Frame.ScrollBarThickness = 6
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.Active = true
@@ -165,7 +163,24 @@ NewUICorner(FPS)
 local TPBox = NewBox(Frame, "PLAYER NAME", 460, "")
 local TPBtn = NewButton(Frame, "TELEPORT TO PLAYER", 510)
 
---================ FAKE LOADING / KEY =================
+--================ SPIN UI (MODIFIED) =================
+local SpinSpeedBox = NewBox(Frame, "SPIN SPEED", 560, "99999")
+local SpinBtn      = NewButton(Frame, "SPIN : OFF", 610)
+
+SpinSpeedBox.FocusLost:Connect(function()
+    local v = tonumber(SpinSpeedBox.Text)
+    if v then
+        getgenv().SpinSpeed = v -- 制限解除
+    end
+    SpinSpeedBox.Text = tostring(getgenv().SpinSpeed)
+end)
+
+SpinBtn.MouseButton1Click:Connect(function()
+    getgenv().SpinEnabled = not getgenv().SpinEnabled
+    SpinBtn.Text = "SPIN : "..(getgenv().SpinEnabled and "ON" or "OFF")
+end)
+
+--================ KEY & AIMBOT LOAD =================
 KeyBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text ~= CORRECT_KEY then return end
     KeyFrame.Visible = false
@@ -174,12 +189,14 @@ KeyBtn.MouseButton1Click:Connect(function()
     LoadText.Text = "0 / 100"
 
     task.spawn(function()
+        -- 0 to 50
         for i = 0, 50 do
             LoadBar.Size = UDim2.new(i/100, 0, 1, 0)
             LoadText.Text = i.." / 100"
             task.wait(LOADING_TIME/100)
         end
         task.wait(6)
+        -- 51 to 99
         for i = 51, 99 do
             LoadBar.Size = UDim2.new(i/100, 0, 1, 0)
             LoadText.Text = i.." / 100"
@@ -194,6 +211,7 @@ KeyBtn.MouseButton1Click:Connect(function()
         Loading.Visible = false
         ToggleBtn.Visible = true
 
+        -- AIMBOT MOBILEの読み込みを確実に実行
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
         end)
@@ -254,7 +272,7 @@ TPBtn.MouseButton1Click:Connect(function()
     end
 end)
 
---================ ESP =================
+--================ ESP LOGIC =================
 task.spawn(function()
     while task.wait(0.5) do
         for _, p in pairs(Players:GetPlayers()) do
@@ -281,7 +299,7 @@ task.spawn(function()
     end
 end)
 
---================ AUTO CLICK =================
+--================ AUTO CLICK LOGIC =================
 task.spawn(function()
     while task.wait(0.03) do
         if getgenv().AutoClick then
@@ -292,7 +310,7 @@ task.spawn(function()
     end
 end)
 
---================ FPS =================
+--================ FPS DISPLAY =================
 local f, lt = 0, os.clock()
 RunService.RenderStepped:Connect(function()
     f += 1
@@ -303,7 +321,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
---================ DRAG =================
+--================ DRAG LOGIC =================
 local dragging = false
 local dragStart, startFrame, startToggle
 ToggleBtn.InputBegan:Connect(function(i)
@@ -336,28 +354,6 @@ UIS.JumpRequest:Connect(function()
             h:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
-end)
-
---================ PLAYER SPIN UI (SELF ONLY) =================
-getgenv().SpinEnabled = false
-getgenv().SpinSpeed   = 5
-
-Frame.CanvasSize = UDim2.new(0, 0, 0, 940)
-
-local SpinSpeedBox = NewBox(Frame, "SPIN SPEED", 560, tostring(getgenv().SpinSpeed))
-local SpinBtn      = NewButton(Frame, "SPIN : OFF", 610)
-
-SpinSpeedBox.FocusLost:Connect(function()
-    local v = tonumber(SpinSpeedBox.Text)
-    if v then
-        getgenv().SpinSpeed = math.clamp(v, 0, 100)
-    end
-    SpinSpeedBox.Text = tostring(getgenv().SpinSpeed)
-end)
-
-SpinBtn.MouseButton1Click:Connect(function()
-    getgenv().SpinEnabled = not getgenv().SpinEnabled
-    SpinBtn.Text = "SPIN : "..(getgenv().SpinEnabled and "ON" or "OFF")
 end)
 
 --================ PLAYER SPIN LOGIC =================
