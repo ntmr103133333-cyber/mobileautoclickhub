@@ -1,6 +1,6 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FULL VERSION / ALL IN ONE)
--- Rayfield Edition (Original Text & Manual Aimbot Load)
+-- MOBILE AUTO CLICK HUB (FULL VERSION / INPUT MODE)
+-- Rayfield Edition (Original Text & All Features)
 --==================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -13,7 +13,7 @@ local TAB_NAME_1    = "まんこ"
 local Window = Rayfield:CreateWindow({
    Name = "MOBILE AUTO CLICK HUB",
    LoadingTitle = LOADING_TITLE,
-   LoadingSubtitle = "Ready to load modules...",
+   LoadingSubtitle = "Input Mode Ready...",
    ConfigurationSaving = { Enabled = false },
    KeySystem = true,
    KeySettings = {
@@ -79,7 +79,7 @@ local function UpdateESP()
     end
 end
 
---================ MAIN TAB =================
+--================ MAIN TAB (Input Focus) =================
 
 MainTab:CreateToggle({
    Name = "AUTO CLICK",
@@ -93,27 +93,40 @@ MainTab:CreateToggle({
    Callback = function(Value) getgenv().InfiniteJumpEnabled = Value end,
 })
 
--- 【リクエスト】ボタンを押した時だけAimbotを読み込む
-MainTab:CreateButton({
-   Name = "LOAD AIMBOT MOBILE",
-   Callback = function()
-      Rayfield:Notify({Title = "Loading", Content = "Starting Aimbot...", Duration = 2})
-      pcall(function()
-          loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
-      end)
+-- 重力入力ボックス
+MainTab:CreateInput({
+   Name = "GRAVITY VALUE",
+   PlaceholderText = "Default: 196.2",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      workspace.Gravity = tonumber(Text) or 196.2
+   end,
+})
+
+-- スピン速度入力ボックス
+MainTab:CreateInput({
+   Name = "SPIN SPEED",
+   PlaceholderText = "99999",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      getgenv().SpinSpeed = tonumber(Text) or 99999
    end,
 })
 
 MainTab:CreateToggle({
-   Name = "SPIN",
+   Name = "SPIN ENABLE",
    CurrentValue = false,
    Callback = function(Value) getgenv().SpinEnabled = Value end,
 })
 
-MainTab:CreateInput({
-   Name = "SPIN SPEED",
-   PlaceholderText = "99999",
-   Callback = function(Text) getgenv().SpinSpeed = tonumber(Text) or 99999 end,
+-- Aimbotボタン
+MainTab:CreateButton({
+   Name = "LOAD AIMBOT MOBILE",
+   Callback = function()
+      pcall(function()
+          loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
+      end)
+   end,
 })
 
 --================ PLAYER TAB =================
@@ -129,19 +142,14 @@ PlayerTab:CreateButton({
    Name = "TELEPORT TO PLAYER",
    Callback = function()
       local name = TargetPlayerName:lower()
-      if name == "" then return end
-      local found = false
       for _, p in pairs(Players:GetPlayers()) do
          if p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name)) then
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
-               found = true
-               Rayfield:Notify({Title = "Success", Content = "Teleported to " .. p.Name, Duration = 2})
                break
             end
          end
       end
-      if not found then Rayfield:Notify({Title = "Error", Content = "Player not found", Duration = 2}) end
    end,
 })
 
@@ -156,25 +164,29 @@ VisualTab:CreateToggle({
    end,
 })
 
-VisualTab:CreateSlider({
+-- ESPサイズ入力
+VisualTab:CreateInput({
    Name = "ESP TEXT SIZE",
-   Range = {10, 50},
-   Increment = 1,
-   CurrentValue = 20,
-   Callback = function(Value) getgenv().ESPSize = Value end,
+   PlaceholderText = "20",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      getgenv().ESPSize = tonumber(Text) or 20
+   end,
 })
 
-VisualTab:CreateSlider({
-   Name = "FOV CHANGER",
-   Range = {70, 120},
-   Increment = 1,
-   CurrentValue = 70,
-   Callback = function(Value) Camera.FieldOfView = Value end,
+-- FOV入力
+VisualTab:CreateInput({
+   Name = "FOV VALUE",
+   PlaceholderText = "70 - 120",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local val = tonumber(Text)
+      if val then Camera.FieldOfView = val end
+   end,
 })
 
 --================ LOGIC LOOPS =================
 
--- Infinite Jump
 UIS.JumpRequest:Connect(function()
     if getgenv().InfiniteJumpEnabled and Player.Character then
         local h = Player.Character:FindFirstChildOfClass("Humanoid")
@@ -182,21 +194,16 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
--- ESP Loop
 task.spawn(function()
-    while task.wait(0.5) do
-        UpdateESP()
-    end
+    while task.wait(0.5) do UpdateESP() end
 end)
 
--- Spin Logic
 RunService.RenderStepped:Connect(function()
     if getgenv().SpinEnabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         Player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
     end
 end)
 
--- Auto Click Logic
 task.spawn(function()
     while task.wait(0.03) do
         if getgenv().AutoClick then
