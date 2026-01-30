@@ -1,6 +1,6 @@
 --==================================================
 -- MOBILE AUTO CLICK HUB (FULL VERSION / ALL IN ONE)
--- Rayfield Edition (Original Text & Infinite Jump)
+-- Rayfield Edition (Original Text & Manual Aimbot Load)
 --==================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -13,7 +13,7 @@ local TAB_NAME_1    = "まんこ"
 local Window = Rayfield:CreateWindow({
    Name = "MOBILE AUTO CLICK HUB",
    LoadingTitle = LOADING_TITLE,
-   LoadingSubtitle = "Restoring Infinite Jump & All Features...",
+   LoadingSubtitle = "Ready to load modules...",
    ConfigurationSaving = { Enabled = false },
    KeySystem = true,
    KeySettings = {
@@ -36,7 +36,7 @@ local Camera        = workspace.CurrentCamera
 getgenv().AutoClick           = false
 getgenv().SpinEnabled         = false
 getgenv().SpinSpeed           = 99999
-getgenv().InfiniteJumpEnabled = false -- 復活
+getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled          = false
 getgenv().ESPSize             = 20
 local TargetPlayerName        = ""
@@ -79,7 +79,7 @@ local function UpdateESP()
     end
 end
 
---================ MAIN TAB (Hacks & Infinite Jump) =================
+--================ MAIN TAB =================
 
 MainTab:CreateToggle({
    Name = "AUTO CLICK",
@@ -88,9 +88,20 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateToggle({
-   Name = "INFINITE JUMP", -- 復活
+   Name = "INFINITE JUMP",
    CurrentValue = false,
    Callback = function(Value) getgenv().InfiniteJumpEnabled = Value end,
+})
+
+-- 【リクエスト】ボタンを押した時だけAimbotを読み込む
+MainTab:CreateButton({
+   Name = "LOAD AIMBOT MOBILE",
+   Callback = function()
+      Rayfield:Notify({Title = "Loading", Content = "Starting Aimbot...", Duration = 2})
+      pcall(function()
+          loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
+      end)
+   end,
 })
 
 MainTab:CreateToggle({
@@ -105,7 +116,7 @@ MainTab:CreateInput({
    Callback = function(Text) getgenv().SpinSpeed = tonumber(Text) or 99999 end,
 })
 
---================ PLAYER TAB (Teleport Fixed) =================
+--================ PLAYER TAB =================
 
 PlayerTab:CreateInput({
    Name = "Target Player Name",
@@ -134,7 +145,7 @@ PlayerTab:CreateButton({
    end,
 })
 
---================ VISUAL TAB (FOV & ESP Size) =================
+--================ VISUAL TAB =================
 
 VisualTab:CreateToggle({
    Name = "ENABLE ESP",
@@ -163,7 +174,7 @@ VisualTab:CreateSlider({
 
 --================ LOGIC LOOPS =================
 
--- Infinite Jump Logic (復活したコアロジック)
+-- Infinite Jump
 UIS.JumpRequest:Connect(function()
     if getgenv().InfiniteJumpEnabled and Player.Character then
         local h = Player.Character:FindFirstChildOfClass("Humanoid")
@@ -171,7 +182,7 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
--- ESP更新ループ
+-- ESP Loop
 task.spawn(function()
     while task.wait(0.5) do
         UpdateESP()
@@ -193,9 +204,4 @@ task.spawn(function()
             VirtualUser:Button1Up(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
         end
     end
-end)
-
--- Aimbot Load
-pcall(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
 end)
