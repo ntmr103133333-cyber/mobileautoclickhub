@@ -1,6 +1,6 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FULL VERSION / INPUT MODE)
--- Rayfield Edition (Original Text & All Features)
+-- MOBILE AUTO CLICK HUB (FULL VERSION / SPEED 0 FIXED)
+-- Rayfield Edition (Original Text & Speed 0 Support)
 --==================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -13,7 +13,7 @@ local TAB_NAME_1    = "まんこ"
 local Window = Rayfield:CreateWindow({
    Name = "MOBILE AUTO CLICK HUB",
    LoadingTitle = LOADING_TITLE,
-   LoadingSubtitle = "Input Mode Ready...",
+   LoadingSubtitle = "Setting Auto Clicker to Max Speed...",
    ConfigurationSaving = { Enabled = false },
    KeySystem = true,
    KeySettings = {
@@ -34,6 +34,7 @@ local Camera        = workspace.CurrentCamera
 
 --================ GLOBALS =================
 getgenv().AutoClick           = false
+getgenv().AutoClickSpeed      = 0 -- デフォルト最速
 getgenv().SpinEnabled         = false
 getgenv().SpinSpeed           = 99999
 getgenv().InfiniteJumpEnabled = false
@@ -79,12 +80,23 @@ local function UpdateESP()
     end
 end
 
---================ MAIN TAB (Input Focus) =================
+--================ MAIN TAB (Auto Click Speed Fixed) =================
 
 MainTab:CreateToggle({
    Name = "AUTO CLICK",
    CurrentValue = false,
    Callback = function(Value) getgenv().AutoClick = Value end,
+})
+
+-- 【リクエスト】速さを入力。0にすると最速（0.01）で待機
+MainTab:CreateInput({
+   Name = "AUTO CLICK SPEED (0 = FASTEST)",
+   PlaceholderText = "0",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local s = tonumber(Text) or 0
+      getgenv().AutoClickSpeed = s
+   end,
 })
 
 MainTab:CreateToggle({
@@ -93,17 +105,15 @@ MainTab:CreateToggle({
    Callback = function(Value) getgenv().InfiniteJumpEnabled = Value end,
 })
 
--- 重力入力ボックス
 MainTab:CreateInput({
    Name = "GRAVITY VALUE",
-   PlaceholderText = "Default: 196.2",
+   PlaceholderText = "196.2",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       workspace.Gravity = tonumber(Text) or 196.2
    end,
 })
 
--- スピン速度入力ボックス
 MainTab:CreateInput({
    Name = "SPIN SPEED",
    PlaceholderText = "99999",
@@ -119,7 +129,6 @@ MainTab:CreateToggle({
    Callback = function(Value) getgenv().SpinEnabled = Value end,
 })
 
--- Aimbotボタン
 MainTab:CreateButton({
    Name = "LOAD AIMBOT MOBILE",
    Callback = function()
@@ -164,7 +173,6 @@ VisualTab:CreateToggle({
    end,
 })
 
--- ESPサイズ入力
 VisualTab:CreateInput({
    Name = "ESP TEXT SIZE",
    PlaceholderText = "20",
@@ -174,7 +182,6 @@ VisualTab:CreateInput({
    end,
 })
 
--- FOV入力
 VisualTab:CreateInput({
    Name = "FOV VALUE",
    PlaceholderText = "70 - 120",
@@ -187,6 +194,7 @@ VisualTab:CreateInput({
 
 --================ LOGIC LOOPS =================
 
+-- Infinite Jump
 UIS.JumpRequest:Connect(function()
     if getgenv().InfiniteJumpEnabled and Player.Character then
         local h = Player.Character:FindFirstChildOfClass("Humanoid")
@@ -194,21 +202,30 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
+-- ESP Loop
 task.spawn(function()
     while task.wait(0.5) do UpdateESP() end
 end)
 
+-- Spin Logic
 RunService.RenderStepped:Connect(function()
     if getgenv().SpinEnabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         Player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
     end
 end)
 
+-- Auto Click Logic (Speed Support)
 task.spawn(function()
-    while task.wait(0.03) do
+    while true do
         if getgenv().AutoClick then
+            local delayTime = getgenv().AutoClickSpeed
+            if delayTime <= 0 then delayTime = 0.01 end -- 0なら最速
+            
             VirtualUser:Button1Down(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
             VirtualUser:Button1Up(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
+            task.wait(delayTime)
+        else
+            task.wait(0.1)
         end
     end
 end)
