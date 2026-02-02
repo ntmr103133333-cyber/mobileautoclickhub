@@ -34,18 +34,14 @@ local Camera        = workspace.CurrentCamera
 
 --================ GLOBALS =================
 getgenv().AutoClick           = false
-getgenv().AutoClickSpeed      = 0 -- デフォルト最速
+getgenv().AutoClickSpeed      = 0 
 getgenv().SpinEnabled         = false
 getgenv().SpinSpeed           = 99999
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled          = false
 getgenv().ESPSize             = 20
+getgenv().StickToPlayer       = false -- 追加
 local TargetPlayerName        = ""
-
---================ TABS =================
-local MainTab = Window:CreateTab(TAB_NAME_1, 4483362458)
-local PlayerTab = Window:CreateTab("Players", 4483362458)
-local VisualTab = Window:CreateTab("Visuals", 4483362458)
 
 --================ ESP CORE LOGIC =================
 local function UpdateESP()
@@ -80,7 +76,12 @@ local function UpdateESP()
     end
 end
 
---================ MAIN TAB (Auto Click Speed Fixed) =================
+--================ TABS =================
+local MainTab = Window:CreateTab(TAB_NAME_1, 4483362458)
+local PlayerTab = Window:CreateTab("Players", 4483362458)
+local VisualTab = Window:CreateTab("Visuals", 4483362458)
+
+--================ MAIN TAB =================
 
 MainTab:CreateToggle({
    Name = "AUTO CLICK",
@@ -88,7 +89,6 @@ MainTab:CreateToggle({
    Callback = function(Value) getgenv().AutoClick = Value end,
 })
 
--- 【リクエスト】速さを入力。0にすると最速（0.01）で待機
 MainTab:CreateInput({
    Name = "AUTO CLICK SPEED (0 = FASTEST)",
    PlaceholderText = "0",
@@ -148,16 +148,43 @@ PlayerTab:CreateInput({
 })
 
 PlayerTab:CreateButton({
-   Name = "TELEPORT TO PLAYER",
+   Name = "TELEPORT TO PLAYER (ONCE)",
    Callback = function()
       local name = TargetPlayerName:lower()
       for _, p in pairs(Players:GetPlayers()) do
-         if p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name)) then
+         if p ~= Player and (p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name))) then
             if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-               Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+               Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
                break
             end
          end
+      end
+   end,
+})
+
+-- 【追加機能】張り付きトグル
+PlayerTab:CreateToggle({
+   Name = "STICK TO PLAYER (LOOP)",
+   CurrentValue = false,
+   Callback = function(Value)
+      getgenv().StickToPlayer = Value
+      if Value then
+         task.spawn(function()
+            while getgenv().StickToPlayer do
+               local name = TargetPlayerName:lower()
+               if name ~= "" then
+                  for _, p in pairs(Players:GetPlayers()) do
+                     if p ~= Player and (p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name))) then
+                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                           Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                        end
+                        break
+                     end
+                  end
+               end
+               task.wait()
+            end
+         end)
       end
    end,
 })
@@ -194,7 +221,6 @@ VisualTab:CreateInput({
 
 --================ LOGIC LOOPS =================
 
--- Infinite Jump
 UIS.JumpRequest:Connect(function()
     if getgenv().InfiniteJumpEnabled and Player.Character then
         local h = Player.Character:FindFirstChildOfClass("Humanoid")
@@ -202,24 +228,21 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
--- ESP Loop
 task.spawn(function()
     while task.wait(0.5) do UpdateESP() end
 end)
 
--- Spin Logic
 RunService.RenderStepped:Connect(function()
     if getgenv().SpinEnabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
         Player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(getgenv().SpinSpeed), 0)
     end
 end)
 
--- Auto Click Logic (Speed Support)
 task.spawn(function()
     while true do
         if getgenv().AutoClick then
             local delayTime = getgenv().AutoClickSpeed
-            if delayTime <= 0 then delayTime = 0.01 end -- 0なら最速
+            if delayTime <= 0 then delayTime = 0.01 end
             
             VirtualUser:Button1Down(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
             VirtualUser:Button1Up(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
