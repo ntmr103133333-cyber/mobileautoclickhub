@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FULL VERSION / SPEED 0 FIXED)
+-- MOBILE AUTO CLICK HUB (FULL VERSION / DROPDOWN UPDATE)
 -- Rayfield Edition (Original Text & Speed 0 Support)
 --==================================================
 
@@ -40,8 +40,19 @@ getgenv().SpinSpeed           = 99999
 getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled          = false
 getgenv().ESPSize             = 20
-getgenv().StickToPlayer       = false -- 追加
-local TargetPlayerName        = ""
+getgenv().StickToPlayer       = false
+local SelectedPlayerName      = ""
+
+--================ HELPER FOR DROPDOWN =================
+local function GetPlayerNames()
+    local names = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= Player then
+            table.insert(names, p.Name)
+        end
+    end
+    return names
+end
 
 --================ ESP CORE LOGIC =================
 local function UpdateESP()
@@ -138,31 +149,39 @@ MainTab:CreateButton({
    end,
 })
 
---================ PLAYER TAB =================
+--================ PLAYER TAB (UPDATED TO DROPDOWN) =================
 
-PlayerTab:CreateInput({
-   Name = "Target Player Name",
-   PlaceholderText = "Enter Name...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text) TargetPlayerName = Text end,
+local PlayerDropdown = PlayerTab:CreateDropdown({
+   Name = "Select Player",
+   Options = GetPlayerNames(),
+   CurrentOption = "",
+   MultipleOptions = false,
+   Flag = "PlayerDropdown1",
+   Callback = function(Option)
+      SelectedPlayerName = Option[1]
+   end,
 })
+
+-- 自動更新ループ
+task.spawn(function()
+    while true do
+        PlayerDropdown:Refresh(GetPlayerNames())
+        task.wait(5)
+    end
+end)
 
 PlayerTab:CreateButton({
    Name = "TELEPORT TO PLAYER (ONCE)",
    Callback = function()
-      local name = TargetPlayerName:lower()
-      for _, p in pairs(Players:GetPlayers()) do
-         if p ~= Player and (p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name))) then
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-               Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-               break
-            end
+      if SelectedPlayerName ~= "" then
+         local target = Players:FindFirstChild(SelectedPlayerName)
+         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
          end
       end
    end,
 })
 
--- 【追加機能】張り付きトグル
 PlayerTab:CreateToggle({
    Name = "STICK TO PLAYER (LOOP)",
    CurrentValue = false,
@@ -171,15 +190,10 @@ PlayerTab:CreateToggle({
       if Value then
          task.spawn(function()
             while getgenv().StickToPlayer do
-               local name = TargetPlayerName:lower()
-               if name ~= "" then
-                  for _, p in pairs(Players:GetPlayers()) do
-                     if p ~= Player and (p.Name:lower():find(name) or (p.DisplayName and p.DisplayName:lower():find(name))) then
-                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                           Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                        end
-                        break
-                     end
+               if SelectedPlayerName ~= "" then
+                  local target = Players:FindFirstChild(SelectedPlayerName)
+                  if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                     Player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
                   end
                end
                task.wait()
