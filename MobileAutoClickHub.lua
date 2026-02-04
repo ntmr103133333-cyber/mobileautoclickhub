@@ -1,5 +1,5 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FULL VERSION / DROPDOWN UPDATE)
+-- MOBILE AUTO CLICK HUB (FULL VERSION / FLY V4 FIXED)
 -- Rayfield Edition (Original Text & Speed 0 Support)
 --==================================================
 
@@ -41,15 +41,72 @@ getgenv().InfiniteJumpEnabled = false
 getgenv().ESPEnabled          = false
 getgenv().ESPSize             = 20
 getgenv().StickToPlayer       = false
+getgenv().FlyEnabled          = false
+getgenv().FlySpeed            = 50
 local SelectedPlayerName      = ""
+
+--================ STABLE FLY LOGIC =================
+local bv, bg
+
+local function StartFly()
+    local char = Player.Character or Player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local hum = char:WaitForChild("Humanoid")
+
+    -- 以前のインスタンスを掃除
+    if bv then bv:Destroy() end
+    if bg then bg:Destroy() end
+
+    -- 速度（移動）用
+    bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.Parent = hrp
+
+    -- 向き用
+    bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bg.CFrame = hrp.CFrame
+    bg.Parent = hrp
+
+    task.spawn(function()
+        while getgenv().FlyEnabled and char and hrp and hum do
+            -- 移動スティックの入力を取得
+            local moveDir = hum.MoveDirection
+            
+            if moveDir.Magnitude > 0 then
+                -- 移動計算：カメラのCFrameを使ってスティック入力を「前・後・左・右」に正しく変換
+                -- これにより「前に行けば見た方向に前進」が完全に実現されます
+                bv.Velocity = moveDir * getgenv().FlySpeed
+                
+                -- 上下移動：カメラが上を向いていれば上昇するように補正
+                if moveDir.Unit:Dot(Camera.CFrame.LookVector) > 0.5 then
+                    bv.Velocity = bv.Velocity + (Camera.CFrame.LookVector * getgenv().FlySpeed)
+                elseif moveDir.Unit:Dot(Camera.CFrame.LookVector) < -0.5 then
+                    bv.Velocity = bv.Velocity + (Camera.CFrame.LookVector * getgenv().FlySpeed)
+                end
+            else
+                bv.Velocity = Vector3.new(0, 0, 0)
+            end
+            
+            -- 体の向きをカメラの方向へ
+            bg.CFrame = Camera.CFrame
+            hum.PlatformStand = true -- 物理演算を無効にして浮かせる
+            RunService.RenderStepped:Wait()
+        end
+        
+        -- 終了処理
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+        if hum then hum.PlatformStand = false end
+    end)
+end
 
 --================ HELPER FOR DROPDOWN =================
 local function GetPlayerNames()
     local names = {}
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= Player then
-            table.insert(names, p.Name)
-        end
+        if p ~= Player then table.insert(names, p.Name) end
     end
     return names
 end
@@ -60,7 +117,6 @@ local function UpdateESP()
         if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = p.Character.HumanoidRootPart
             local gui = hrp:FindFirstChild("ESP_Gui")
-            
             if getgenv().ESPEnabled then
                 if not gui then
                     gui = Instance.new("BillboardGui", hrp)
@@ -68,7 +124,6 @@ local function UpdateESP()
                     gui.AlwaysOnTop = true
                     gui.ExtentsOffset = Vector3.new(0, 3, 0)
                     gui.Size = UDim2.new(0, 200, 0, 50)
-                    
                     local tl = Instance.new("TextLabel", gui)
                     tl.Name = "ESP_Label"
                     tl.BackgroundTransparency = 1
@@ -77,9 +132,7 @@ local function UpdateESP()
                     tl.TextColor3 = Color3.fromRGB(0, 255, 0)
                     tl.TextStrokeTransparency = 0
                 end
-                if gui:FindFirstChild("ESP_Label") then
-                    gui.ESP_Label.TextSize = getgenv().ESPSize
-                end
+                if gui:FindFirstChild("ESP_Label") then gui.ESP_Label.TextSize = getgenv().ESPSize end
             else
                 if gui then gui:Destroy() end
             end
@@ -95,6 +148,22 @@ local VisualTab = Window:CreateTab("Visuals", 4483362458)
 --================ MAIN TAB =================
 
 MainTab:CreateToggle({
+   Name = "FLY ENABLE",
+   CurrentValue = false,
+   Callback = function(Value) 
+       getgenv().FlyEnabled = Value 
+       if Value then StartFly() end
+   end,
+})
+
+MainTab:CreateInput({
+   Name = "FLY SPEED",
+   PlaceholderText = "50",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text) getgenv().FlySpeed = tonumber(Text) or 50 end,
+})
+
+MainTab:CreateToggle({
    Name = "AUTO CLICK",
    CurrentValue = false,
    Callback = function(Value) getgenv().AutoClick = Value end,
@@ -104,10 +173,7 @@ MainTab:CreateInput({
    Name = "AUTO CLICK SPEED (0 = FASTEST)",
    PlaceholderText = "0",
    RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local s = tonumber(Text) or 0
-      getgenv().AutoClickSpeed = s
-   end,
+   Callback = function(Text) getgenv().AutoClickSpeed = tonumber(Text) or 0 end,
 })
 
 MainTab:CreateToggle({
@@ -120,18 +186,14 @@ MainTab:CreateInput({
    Name = "GRAVITY VALUE",
    PlaceholderText = "196.2",
    RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      workspace.Gravity = tonumber(Text) or 196.2
-   end,
+   Callback = function(Text) workspace.Gravity = tonumber(Text) or 196.2 end,
 })
 
 MainTab:CreateInput({
    Name = "SPIN SPEED",
    PlaceholderText = "99999",
    RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      getgenv().SpinSpeed = tonumber(Text) or 99999
-   end,
+   Callback = function(Text) getgenv().SpinSpeed = tonumber(Text) or 99999 end,
 })
 
 MainTab:CreateToggle({
@@ -149,7 +211,7 @@ MainTab:CreateButton({
    end,
 })
 
---================ PLAYER TAB (UPDATED TO DROPDOWN) =================
+--================ PLAYER TAB =================
 
 local PlayerDropdown = PlayerTab:CreateDropdown({
    Name = "Select Player",
@@ -157,12 +219,9 @@ local PlayerDropdown = PlayerTab:CreateDropdown({
    CurrentOption = "",
    MultipleOptions = false,
    Flag = "PlayerDropdown1",
-   Callback = function(Option)
-      SelectedPlayerName = Option[1]
-   end,
+   Callback = function(Option) SelectedPlayerName = Option[1] end,
 })
 
--- 自動更新ループ
 task.spawn(function()
     while true do
         PlayerDropdown:Refresh(GetPlayerNames())
@@ -218,9 +277,7 @@ VisualTab:CreateInput({
    Name = "ESP TEXT SIZE",
    PlaceholderText = "20",
    RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      getgenv().ESPSize = tonumber(Text) or 20
-   end,
+   Callback = function(Text) getgenv().ESPSize = tonumber(Text) or 20 end,
 })
 
 VisualTab:CreateInput({
@@ -233,7 +290,7 @@ VisualTab:CreateInput({
    end,
 })
 
---================ LOGIC LOOPS =================
+--================ LOOPS =================
 
 UIS.JumpRequest:Connect(function()
     if getgenv().InfiniteJumpEnabled and Player.Character then
@@ -257,7 +314,6 @@ task.spawn(function()
         if getgenv().AutoClick then
             local delayTime = getgenv().AutoClickSpeed
             if delayTime <= 0 then delayTime = 0.01 end
-            
             VirtualUser:Button1Down(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
             VirtualUser:Button1Up(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2), Camera.CFrame)
             task.wait(delayTime)
