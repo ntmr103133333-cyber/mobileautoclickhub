@@ -1,25 +1,28 @@
 --==================================================
--- MOBILE AUTO CLICK HUB (FULL VERSION / FLY V4 FIXED)
--- Rayfield Edition (Original Text & Speed 0 Support)
+-- MOBILE AUTO CLICK HUB (日本語版 / FLY V4 FIXED)
+-- Rayfield Edition
 --==================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- 元のテキスト設定（一切変更なし）
-local CORRECT_KEY   = "cicocico1031"
-local LOADING_TITLE = "おまんこ大統領セックスイクイク//"
-local TAB_NAME_1    = "気持ちい//"
+-- テキスト設定（日本語に翻訳・規約を考慮した修正）
+local CORRECT_KEY   = "ntmr1031"
+local LOADING_TITLE = "モバイル・オートクリック・ハブ"
+local LOADING_SUB   = "最高速度で設定中..."
+local TAB_NAME_1    = "メイン機能"
+local TAB_NAME_2    = "プレイヤー操作"
+local TAB_NAME_3    = "ビジュアル/表示"
 
 local Window = Rayfield:CreateWindow({
    Name = "MOBILE AUTO CLICK HUB",
    LoadingTitle = LOADING_TITLE,
-   LoadingSubtitle = "Setting Auto Clicker to Max Speed...",
+   LoadingSubtitle = LOADING_SUB,
    ConfigurationSaving = { Enabled = false },
    KeySystem = true,
    KeySettings = {
-      Title = "Key System",
-      Subtitle = "Enter Key",
-      Note = "Key is: cicocico1031",
+      Title = "キー認証システム",
+      Subtitle = "キーを入力してください",
+      Note = "キーは: ntmr1031 です",
       Key = {CORRECT_KEY}
    }
 })
@@ -53,17 +56,14 @@ local function StartFly()
     local hrp = char:WaitForChild("HumanoidRootPart")
     local hum = char:WaitForChild("Humanoid")
 
-    -- 以前のインスタンスを掃除
     if bv then bv:Destroy() end
     if bg then bg:Destroy() end
 
-    -- 速度（移動）用
     bv = Instance.new("BodyVelocity")
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bv.Velocity = Vector3.new(0, 0, 0)
     bv.Parent = hrp
 
-    -- 向き用
     bg = Instance.new("BodyGyro")
     bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     bg.CFrame = hrp.CFrame
@@ -71,15 +71,10 @@ local function StartFly()
 
     task.spawn(function()
         while getgenv().FlyEnabled and char and hrp and hum do
-            -- 移動スティックの入力を取得
             local moveDir = hum.MoveDirection
             
             if moveDir.Magnitude > 0 then
-                -- 移動計算：カメラのCFrameを使ってスティック入力を「前・後・左・右」に正しく変換
-                -- これにより「前に行けば見た方向に前進」が完全に実現されます
                 bv.Velocity = moveDir * getgenv().FlySpeed
-                
-                -- 上下移動：カメラが上を向いていれば上昇するように補正
                 if moveDir.Unit:Dot(Camera.CFrame.LookVector) > 0.5 then
                     bv.Velocity = bv.Velocity + (Camera.CFrame.LookVector * getgenv().FlySpeed)
                 elseif moveDir.Unit:Dot(Camera.CFrame.LookVector) < -0.5 then
@@ -89,13 +84,11 @@ local function StartFly()
                 bv.Velocity = Vector3.new(0, 0, 0)
             end
             
-            -- 体の向きをカメラの方向へ
             bg.CFrame = Camera.CFrame
-            hum.PlatformStand = true -- 物理演算を無効にして浮かせる
+            hum.PlatformStand = true
             RunService.RenderStepped:Wait()
         end
         
-        -- 終了処理
         if bv then bv:Destroy() end
         if bg then bg:Destroy() end
         if hum then hum.PlatformStand = false end
@@ -142,13 +135,13 @@ end
 
 --================ TABS =================
 local MainTab = Window:CreateTab(TAB_NAME_1, 4483362458)
-local PlayerTab = Window:CreateTab("Players", 4483362458)
-local VisualTab = Window:CreateTab("Visuals", 4483362458)
+local PlayerTab = Window:CreateTab(TAB_NAME_2, 4483362458)
+local VisualTab = Window:CreateTab(TAB_NAME_3, 4483362458)
 
 --================ MAIN TAB =================
 
 MainTab:CreateToggle({
-   Name = "FLY ENABLE",
+   Name = "飛行モード (FLY) 有効化",
    CurrentValue = false,
    Callback = function(Value) 
        getgenv().FlyEnabled = Value 
@@ -157,53 +150,53 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateInput({
-   Name = "FLY SPEED",
+   Name = "飛行速度",
    PlaceholderText = "50",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text) getgenv().FlySpeed = tonumber(Text) or 50 end,
 })
 
 MainTab:CreateToggle({
-   Name = "AUTO CLICK",
+   Name = "オートクリック有効化",
    CurrentValue = false,
    Callback = function(Value) getgenv().AutoClick = Value end,
 })
 
 MainTab:CreateInput({
-   Name = "AUTO CLICK SPEED (0 = FASTEST)",
+   Name = "クリック速度 (0 = 最速)",
    PlaceholderText = "0",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text) getgenv().AutoClickSpeed = tonumber(Text) or 0 end,
 })
 
 MainTab:CreateToggle({
-   Name = "INFINITE JUMP",
+   Name = "無限ジャンプ",
    CurrentValue = false,
    Callback = function(Value) getgenv().InfiniteJumpEnabled = Value end,
 })
 
 MainTab:CreateInput({
-   Name = "GRAVITY VALUE",
+   Name = "重力の値 (標準: 196.2)",
    PlaceholderText = "196.2",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text) workspace.Gravity = tonumber(Text) or 196.2 end,
 })
 
 MainTab:CreateInput({
-   Name = "SPIN SPEED",
+   Name = "スピン(回転)速度",
    PlaceholderText = "99999",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text) getgenv().SpinSpeed = tonumber(Text) or 99999 end,
 })
 
 MainTab:CreateToggle({
-   Name = "SPIN ENABLE",
+   Name = "スピン有効化",
    CurrentValue = false,
    Callback = function(Value) getgenv().SpinEnabled = Value end,
 })
 
 MainTab:CreateButton({
-   Name = "LOAD AIMBOT MOBILE",
+   Name = "エイムボット(モバイル版)を読み込む",
    Callback = function()
       pcall(function()
           loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))()
@@ -214,7 +207,7 @@ MainTab:CreateButton({
 --================ PLAYER TAB =================
 
 local PlayerDropdown = PlayerTab:CreateDropdown({
-   Name = "Select Player",
+   Name = "プレイヤーを選択",
    Options = GetPlayerNames(),
    CurrentOption = "",
    MultipleOptions = false,
@@ -230,7 +223,7 @@ task.spawn(function()
 end)
 
 PlayerTab:CreateButton({
-   Name = "TELEPORT TO PLAYER (ONCE)",
+   Name = "選択した相手へテレポート",
    Callback = function()
       if SelectedPlayerName ~= "" then
          local target = Players:FindFirstChild(SelectedPlayerName)
@@ -242,7 +235,7 @@ PlayerTab:CreateButton({
 })
 
 PlayerTab:CreateToggle({
-   Name = "STICK TO PLAYER (LOOP)",
+   Name = "相手に執着する (追尾ループ)",
    CurrentValue = false,
    Callback = function(Value)
       getgenv().StickToPlayer = Value
@@ -265,7 +258,7 @@ PlayerTab:CreateToggle({
 --================ VISUAL TAB =================
 
 VisualTab:CreateToggle({
-   Name = "ENABLE ESP",
+   Name = "ESP(透視)を有効にする",
    CurrentValue = false,
    Callback = function(Value) 
       getgenv().ESPEnabled = Value 
@@ -274,14 +267,14 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateInput({
-   Name = "ESP TEXT SIZE",
+   Name = "ESPの文字サイズ",
    PlaceholderText = "20",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text) getgenv().ESPSize = tonumber(Text) or 20 end,
 })
 
 VisualTab:CreateInput({
-   Name = "FOV VALUE",
+   Name = "視野角(FOV)設定",
    PlaceholderText = "70 - 120",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
