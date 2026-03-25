@@ -7,8 +7,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- 元のテキスト設定（一切変更なし）
 local CORRECT_KEY   = "cicocico1031"
-local LOADING_TITLE = "まんこ穴中出しセックス あーん///blせっくすいくいくおほおほ"
-local TAB_NAME_1    = "まんこ"
+local LOADING_TITLE = おまんこ大統領セックスイクイク//"
+local TAB_NAME_1    = "気持ちい//"
 
 local Window = Rayfield:CreateWindow({
    Name = "MOBILE AUTO CLICK HUB",
