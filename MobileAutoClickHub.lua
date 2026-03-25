@@ -6,8 +6,8 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- テキスト設定（日本語に翻訳・規約を考慮した修正）
-local CORRECT_KEY   = "ntmr1031"
-local LOADING_TITLE = "モバイル・オートクリック・ハブ"
+local CORRECT_KEY   = "cicocico103161611919"
+local LOADING_TITLE = "チンコ・ハブ"
 local LOADING_SUB   = "最高速度で設定中..."
 local TAB_NAME_1    = "メイン機能"
 local TAB_NAME_2    = "プレイヤー操作"
@@ -22,7 +22,7 @@ local Window = Rayfield:CreateWindow({
    KeySettings = {
       Title = "キー認証システム",
       Subtitle = "キーを入力してください",
-      Note = "キーは: ntmr1031 です",
+      Note = "キーは:  ディスコードです",
       Key = {CORRECT_KEY}
    }
 })
